@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="assets/cover.jpeg" alt="OpenClaw Aegis — Self-Healing Sidecar for OpenClaw Gateway" width="100%" />
+  <img src="assets/cover.jpg" alt="OpenClaw Aegis — Self-Healing Sidecar for OpenClaw Gateway" width="820" height="450" />
 </p>
 
 <h1 align="center">OpenClaw Aegis</h1>
