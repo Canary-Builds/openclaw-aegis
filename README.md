@@ -19,7 +19,7 @@ Aegis prevents this:
 1. **Detects** failures via 10 health probes (process, port, config, memory, CPU, disk, logs, network, WebSocket, HTTP)
 2. **Diagnoses** the root cause using 6 failure pattern matchers
 3. **Fixes** automatically — restores known-good config, clears stale PIDs, runs safe `doctor --fix`
-4. **Alerts** you through channels that bypass the gateway entirely (ntfy, Telegram, WhatsApp, Slack, webhook)
+4. **Alerts** you through channels that bypass the gateway entirely (ntfy, Telegram, WhatsApp, Slack, Discord, Email, Pushover, webhook)
 
 **Total downtime: ~15 seconds instead of hours.**
 
@@ -75,7 +75,7 @@ Probes: 10 passed, 0 failed
 ## How It Works
 
 ```
-OpenClaw Gateway (Raven)          Aegis Sidecar
+OpenClaw Gateway                  Aegis Sidecar
 ┌─────────────────────┐          ┌──────────────────────────────┐
 │                     │          │  Health Monitor (10 probes)  │
 │  ~/.openclaw/       │◄────────►│  Config Guardian             │

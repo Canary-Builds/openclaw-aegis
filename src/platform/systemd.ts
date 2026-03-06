@@ -95,7 +95,7 @@ export class SystemdAdapter implements PlatformAdapter {
     return `[Unit]
 Description=OpenClaw Aegis Self-Healing Daemon
 After=network.target
-Documentation=https://github.com/pronterlabs/openclaw-aegis
+Documentation=https://github.com/Canary-Builds/openclaw-aegis
 
 [Service]
 Type=notify
