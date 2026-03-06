@@ -11,7 +11,7 @@
 
 ---
 
-## The armor Your Gateway Deserves
+## The Armor Your Gateway Deserves
 
 When your OpenClaw gateway goes down, **everything goes dark** — Telegram, WhatsApp, all channels. Silent. No alerts, no warnings, nothing. If a bad config caused the crash, restarting won't help. The `.bak` files carry the same poison. You only find out hours later when someone asks why messages stopped.
 
