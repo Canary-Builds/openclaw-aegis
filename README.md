@@ -5,7 +5,7 @@
 <h1 align="center">OpenClaw Aegis</h1>
 
 <p align="center">
-  <strong>Your gateway's armored guardian. Always watching. Always ready.</strong>
+  <strong>The self-healing shield for your OpenClaw Gateway. Always watching. Always ready.</strong>
 </p>
 
 <p align="center">
