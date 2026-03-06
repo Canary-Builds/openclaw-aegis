@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OpenClaw Aegis — Roadmap</title>
+<style>
+  :root {
+    --bg: #0d1117;
+    --surface: #161b22;
+    --border: #30363d;
+    --text: #c9d1d9;
+    --text-muted: #8b949e;
+    --accent: #58a6ff;
+    --green: #3fb950;
+    --yellow: #d29922;
+    --orange: #db6d28;
+    --red: #f85149;
+    --purple: #bc8cff;
+    --pink: #f778ba;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Header */
+  .header {
+    padding: 48px 48px 24px;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .header h1 {
+    font-size: 32px;
+    font-weight: 700;
+    margin-bottom: 8px;
+  }
+
+  .header h1 span { color: var(--accent); }
+
+  .header p {
+    color: var(--text-muted);
+    font-size: 16px;
+    line-height: 1.6;
+    max-width: 720px;
+  }
+
+  /* Legend */
+  .legend {
+    display: flex;
+    gap: 24px;
+    padding: 16px 48px;
+    flex-wrap: wrap;
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: var(--text-muted);
+  }
+
+  .legend-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+  }
+
+  /* Timeline Container */
+  .timeline-wrapper {
+    padding: 24px 0 48px;
+    overflow-x: auto;
+    overflow-y: visible;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+    scrollbar-color: var(--border) var(--bg);
+  }
+
+  .timeline-wrapper::-webkit-scrollbar { height: 8px; }
+  .timeline-wrapper::-webkit-scrollbar-track { background: var(--bg); }
+  .timeline-wrapper::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+  .timeline {
+    display: flex;
+    gap: 0;
+    padding: 0 48px;
+    min-width: max-content;
+    position: relative;
+  }
+
+  /* The horizontal line */
+  .timeline::before {
+    content: '';
+    position: absolute;
+    top: 40px;
+    left: 48px;
+    right: 48px;
+    height: 3px;
+    background: linear-gradient(90deg, var(--green), var(--accent), var(--purple), var(--orange), var(--pink));
+    border-radius: 2px;
+    z-index: 0;
+  }
+
+  /* Phase */
+  .phase {
+    min-width: 340px;
+    max-width: 380px;
+    flex-shrink: 0;
+    position: relative;
+    padding: 0 12px;
+  }
+
+  .phase-header {
+    text-align: center;
+    margin-bottom: 24px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .phase-dot {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    margin: 30px auto 12px;
+    border: 3px solid var(--bg);
+    box-shadow: 0 0 0 2px var(--border);
+    position: relative;
+    z-index: 2;
+  }
+
+  .phase-dot.done { background: var(--green); box-shadow: 0 0 0 2px var(--green), 0 0 12px rgba(63,185,80,0.3); }
+  .phase-dot.current { background: var(--accent); box-shadow: 0 0 0 2px var(--accent), 0 0 12px rgba(88,166,255,0.3); animation: pulse 2s infinite; }
+  .phase-dot.next { background: var(--purple); box-shadow: 0 0 0 2px var(--purple); }
+  .phase-dot.future { background: var(--orange); box-shadow: 0 0 0 2px var(--orange); }
+  .phase-dot.vision { background: var(--pink); box-shadow: 0 0 0 2px var(--pink); }
+
+  @keyframes pulse {
+    0%, 100% { box-shadow: 0 0 0 2px var(--accent), 0 0 12px rgba(88,166,255,0.3); }
+    50% { box-shadow: 0 0 0 2px var(--accent), 0 0 20px rgba(88,166,255,0.6); }
+  }
+
+  .phase-label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--text-muted);
+    margin-bottom: 4px;
+  }
+
+  .phase-title {
+    font-size: 18px;
+    font-weight: 600;
+  }
+
+  .phase-version {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-top: 2px;
+  }
+
+  /* Cards */
+  .cards {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 14px;
+    transition: border-color 0.2s, transform 0.2s;
+    cursor: default;
+  }
+
+  .card:hover {
+    border-color: var(--accent);
+    transform: translateY(-2px);
+  }
+
+  .card-title {
+    font-size: 13px;
+    font-weight: 600;
+    margin-bottom: 4px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .card-desc {
+    font-size: 12px;
+    color: var(--text-muted);
+    line-height: 1.5;
+  }
+
+  .tag {
+    display: inline-block;
+    font-size: 10px;
+    padding: 1px 6px;
+    border-radius: 10px;
+    font-weight: 500;
+    letter-spacing: 0.3px;
+  }
+
+  .tag-probe { background: rgba(63,185,80,0.15); color: var(--green); }
+  .tag-recovery { background: rgba(219,109,40,0.15); color: var(--orange); }
+  .tag-alert { background: rgba(88,166,255,0.15); color: var(--accent); }
+  .tag-dx { background: rgba(188,140,255,0.15); color: var(--purple); }
+  .tag-infra { background: rgba(247,120,186,0.15); color: var(--pink); }
+  .tag-security { background: rgba(248,81,73,0.15); color: var(--red); }
+  .tag-ai { background: rgba(210,153,34,0.15); color: var(--yellow); }
+
+  .done-check {
+    color: var(--green);
+    font-size: 14px;
+  }
+
+  /* Scroll hint */
+  .scroll-hint {
+    text-align: center;
+    padding: 12px;
+    color: var(--text-muted);
+    font-size: 13px;
+    animation: fadeInOut 3s ease-in-out infinite;
+  }
+
+  @keyframes fadeInOut {
+    0%, 100% { opacity: 0.4; }
+    50% { opacity: 1; }
+  }
+
+  /* Inspired-by section */
+  .inspired {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 24px 48px 64px;
+  }
+
+  .inspired h2 {
+    font-size: 20px;
+    font-weight: 600;
+    margin-bottom: 16px;
+    color: var(--text-muted);
+  }
+
+  .inspired-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 12px;
+  }
+
+  .inspired-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px 16px;
+  }
+
+  .inspired-card h3 {
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+
+  .inspired-card p {
+    font-size: 12px;
+    color: var(--text-muted);
+    line-height: 1.5;
+  }
+
+  .inspired-source {
+    font-size: 11px;
+    color: var(--accent);
+    margin-top: 6px;
+    opacity: 0.7;
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>OpenClaw <span>Aegis</span> Roadmap</h1>
+  <p>From sidecar health monitor to full self-healing infrastructure platform. Each phase builds on the last — scroll right to see the future.</p>
+</div>
+
+<div class="legend">
+  <div class="legend-item"><div class="legend-dot" style="background:var(--green)"></div> Shipped</div>
+  <div class="legend-item"><div class="legend-dot" style="background:var(--accent)"></div> Current</div>
+  <div class="legend-item"><div class="legend-dot" style="background:var(--purple)"></div> Next</div>
+  <div class="legend-item"><div class="legend-dot" style="background:var(--orange)"></div> Planned</div>
+  <div class="legend-item"><div class="legend-dot" style="background:var(--pink)"></div> Vision</div>
+</div>
+
+<div class="scroll-hint">Scroll horizontally to explore the roadmap &rarr;</div>
+
+<div class="timeline-wrapper">
+  <div class="timeline">
+
+    <!-- PHASE 1: Foundation (DONE) -->
+    <div class="phase">
+      <div class="phase-header">
+        <div class="phase-dot done"></div>
+        <div class="phase-label">Phase 1</div>
+        <div class="phase-title">Foundation</div>
+        <div class="phase-version">v1.0 &ndash; v1.2 &middot; Shipped</div>
+      </div>
+      <div class="cards">
+        <div class="card">
+          <div class="card-title"><span class="done-check">&#10003;</span> 10 Health Probes</div>
+          <div class="card-desc">Process, port, HTTP, config, WebSocket, TUN, memory, CPU, disk, log tail — full gateway observability.</div>
+        </div>
+        <div class="card">
+          <div class="card-title"><span class="done-check">&#10003;</span> L1/L2/L4 Recovery</div>
+          <div class="card-desc">Quick restart, targeted repair (6 patterns), human alert cascade with anti-flap and circuit breaker.</div>
+        </div>
+        <div class="card">
+          <div class="card-title"><span class="done-check">&#10003;</span> 8 Alert Providers</div>
+          <div class="card-desc">ntfy, Telegram, WhatsApp, Slack, Discord, Email, Pushover, webhook — all out-of-band.</div>
+        </div>
+        <div class="card">
+          <div class="card-title"><span class="done-check">&#10003;</span> Config Guardian</div>
+          <div class="card-desc">Dead man's switch, pre-flight validation, two-tier backup (chronological + known-good).</div>
+        </div>
+        <div class="card">
+          <div class="card-title"><span class="done-check">&#10003;</span> Cross-Platform</div>
+          <div class="card-desc">macOS (launchd) + Linux (systemd). Auto-detect platform, PID resolution, native probes.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PHASE 2: Integration (DONE) -->
+    <div class="phase">
+      <div class="phase-header">
+        <div class="phase-dot done"></div>
+        <div class="phase-label">Phase 2</div>
+        <div class="phase-title">Integration</div>
+        <div class="phase-version">v1.3 &middot; Shipped</div>
+      </div>
+      <div class="cards">
+        <div class="card">
+          <div class="card-title"><span class="done-check">&#10003;</span> REST API Server <span class="tag tag-dx">DX</span></div>
+          <div class="card-desc">18 JSON endpoints for dashboard integration — health, probes, incidents, recovery, config, alerts.</div>
+        </div>
+        <div class="card">
+          <div class="card-title"><span class="done-check">&#10003;</span> Bot Commands <span class="tag tag-alert">ALERTS</span></div>
+          <div class="card-desc">Two-way messaging on Telegram, WhatsApp, Slack, Discord. 8 commands: /health, /status, /incidents, etc.</div>
+        </div>
+        <div class="card">
+          <div class="card-title"><span class="done-check">&#10003;</span> Auto Port Detection <span class="tag tag-dx">DX</span></div>
+          <div class="card-desc">Reads gateway port from openclaw.json at runtime. Zero-config for standard installations.</div>
+        </div>
+        <div class="card">
+          <div class="card-title"><span class="done-check">&#10003;</span> Incident Browser <span class="tag tag-dx">DX</span></div>
+          <div class="card-desc">aegis incidents — list, detail, timeline view. JSONL storage with MTTR calculation.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PHASE 3: L3 Recovery (CURRENT) -->
+    <div class="phase">
+      <div class="phase-header">
+        <div class="phase-dot current"></div>
+        <div class="phase-label">Phase 3</div>
+        <div class="phase-title">L3 Recovery</div>
+        <div class="phase-version">v1.4 &middot; In Progress</div>
+      </div>
+      <div class="cards">
+        <div class="card">
+          <div class="card-title">Deep Repair Tier <span class="tag tag-recovery">RECOVERY</span></div>
+          <div class="card-desc">L3 sits between L2 (targeted) and L4 (human). Riskier automated fixes: service reinstall, dependency repair, config migration.</div>
+        </div>
+        <div class="card">
+          <div class="card-title">Network Repair <span class="tag tag-recovery">RECOVERY</span></div>
+          <div class="card-desc">Detect and fix DNS resolution failures, stale routes, TUN interface resets. Inspired by Monit's network checks.</div>
+        </div>
+        <div class="card">
+          <div class="card-title">Process Resurrection <span class="tag tag-recovery">RECOVERY</span></div>
+          <div class="card-desc">If gateway binary is missing or corrupted, attempt re-download and reinstall from known-good source.</div>
+        </div>
+        <div class="card">
+          <div class="card-title">Dependency Health <span class="tag tag-recovery">RECOVERY</span></div>
+          <div class="card-desc">Check node_modules integrity, detect missing native modules, auto-rebuild when possible.</div>
+        </div>
+        <div class="card">
+          <div class="card-title">Safe Mode Boot <span class="tag tag-recovery">RECOVERY</span></div>
+          <div class="card-desc">Start gateway with minimal config (no plugins, default routes) to isolate failures. Like Windows Safe Mode for OpenClaw.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PHASE 4: Observability -->
+    <div class="phase">
+      <div class="phase-header">
+        <div class="phase-dot next"></div>
+        <div class="phase-label">Phase 4</div>
+        <div class="phase-title">Observability</div>
+        <div class="phase-version">v1.5 &middot; Next</div>
+      </div>
+      <div class="cards">
+        <div class="card">
+          <div class="card-title">Prometheus Metrics <span class="tag tag-infra">INFRA</span></div>
+          <div class="card-desc">Expose /metrics endpoint in Prometheus format. Probe latencies, health scores, recovery counts, alert delivery times.</div>
+        </div>
+        <div class="card">
+          <div class="card-title">Structured Logging <span class="tag tag-dx">DX</span></div>
+          <div class="card-desc">JSON log output with severity levels, correlation IDs, and log rotation. Compatible with Loki, ELK, CloudWatch.</div>
+        </div>
+        <div class="card">
+          <div class="card-title">Health History <span class="tag tag-probe">PROBES</span></div>
+          <div class="card-desc">Time-series storage of probe results. Trend analysis, degradation detection, capacity planning graphs.</div>
+        </div>
+        <div class="card">
+          <div class="card-title">SLA Tracking <span class="tag tag-dx">DX</span></div>
+          <div class="card-desc">Uptime percentage, SLA compliance reports, availability windows. Inspired by Datadog SLO monitoring.</div>
+        </div>
+        <div class="card">
+          <div class="card-title">OpenTelemetry Traces <span class="tag tag-infra">INFRA</span></div>
+          <div class="card-desc">Distributed tracing for recovery actions. See the full journey from probe failure to resolution.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PHASE 5: Intelligence -->
+    <div class="phase">
+      <div class="phase-header">
+        <div class="phase-dot future"></div>
+        <div class="phase-label">Phase 5</div>
+        <div class="phase-title">Intelligence</div>
+        <div class="phase-version">v2.0 &middot; Planned</div>
+      </div>
+      <div class="cards">
+        <div class="card">
+          <div class="card-title">Anomaly Detection <span class="tag tag-ai">AI</span></div>
+          <div class="card-desc">Baseline normal behavior, detect deviations before they become failures. Statistical + ML approach inspired by Datadog.</div>
+        </div>
+        <div class="card">
+          <div class="card-title">Predictive Alerts <span class="tag tag-ai">AI</span></div>
+          <div class="card-desc">Memory leak trajectory, disk fill rate, CPU trend — alert before thresholds are hit. Like PagerDuty's intelligent alerting.</div>
+        </div>
+        <div class="card">
+          <div class="card-title">Root Cause Analysis <span class="tag tag-ai">AI</span></div>
+          <div class="card-desc">Correlate probe failures, log patterns, and system events to pinpoint root cause. Inspired by Datadog Watchdog.</div>
+        </div>
+        <div class="card">
+          <div class="card-title">Runbook Automation <span class="tag tag-recovery">RECOVERY</span></div>
+          <div class="card-desc">User-defined YAML runbooks for custom recovery procedures. Conditional steps, rollback on failure. Like PagerDuty's runbook automation.</div>
+        </div>
+        <div class="card">
+          <div class="card-title">Alert Noise Reduction <span class="tag tag-alert">ALERTS</span></div>
+          <div class="card-desc">Group related alerts, suppress duplicates, intelligent escalation. Inspired by PagerDuty's Event Intelligence.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PHASE 6: Fleet -->
+    <div class="phase">
+      <div class="phase-header">
+        <div class="phase-dot future"></div>
+        <div class="phase-label">Phase 6</div>
+        <div class="phase-title">Fleet Management</div>
+        <div class="phase-version">v2.1 &middot; Planned</div>
+      </div>
+      <div class="cards">
+        <div class="card">
+          <div class="card-title">Multi-Instance <span class="tag tag-infra">INFRA</span></div>
+          <div class="card-desc">Monitor multiple OpenClaw gateways from a single Aegis instance. Aggregate health view across your fleet.</div>
+        </div>
+        <div class="card">
+          <div class="card-title">Remote Agent Mode <span class="tag tag-infra">INFRA</span></div>
+          <div class="card-desc">Lightweight agent on each node reports to a central Aegis coordinator. Inspired by Datadog Agent architecture.</div>
+        </div>
+        <div class="card">
+          <div class="card-title">Config Sync <span class="tag tag-dx">DX</span></div>
+          <div class="card-desc">Push config changes to all instances from a central source. Git-backed config management with drift detection.</div>
+        </div>
+        <div class="card">
+          <div class="card-title">Rolling Restarts <span class="tag tag-recovery">RECOVERY</span></div>
+          <div class="card-desc">Coordinate restarts across fleet — one at a time, with health verification between each. Zero-downtime recovery.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PHASE 7: Ecosystem -->
+    <div class="phase">
+      <div class="phase-header">
+        <div class="phase-dot future"></div>
+        <div class="phase-label">Phase 7</div>
+        <div class="phase-title">Ecosystem</div>
+        <div class="phase-version">v2.2 &middot; Planned</div>
+      </div>
+      <div class="cards">
+        <div class="card">
+          <div class="card-title">Plugin System <span class="tag tag-dx">DX</span></div>
+          <div class="card-desc">Custom probes, recovery actions, and alert providers as npm packages. Hook into the probe pipeline with a simple API.</div>
+        </div>
+        <div class="card">
+          <div class="card-title">Web Dashboard <span class="tag tag-dx">DX</span></div>
+          <div class="card-desc">Standalone web UI with real-time health display, incident timeline, config editor. Built on the REST API.</div>
+        </div>
+        <div class="card">
+          <div class="card-title">Terraform Provider <span class="tag tag-infra">INFRA</span></div>
+          <div class="card-desc">Manage Aegis config as Infrastructure-as-Code. Declare alert channels, thresholds, and recovery policies in HCL.</div>
+        </div>
+        <div class="card">
+          <div class="card-title">GitHub/GitLab Integration <span class="tag tag-dx">DX</span></div>
+          <div class="card-desc">Auto-create issues on incidents, link PRs to fixes, deployment status checks. Close the loop from alert to resolution.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PHASE 8: Vision -->
+    <div class="phase">
+      <div class="phase-header">
+        <div class="phase-dot vision"></div>
+        <div class="phase-label">Phase 8</div>
+        <div class="phase-title">Autonomous</div>
+        <div class="phase-version">v3.0 &middot; Vision</div>
+      </div>
+      <div class="cards">
+        <div class="card">
+          <div class="card-title">LLM-Powered Diagnosis <span class="tag tag-ai">AI</span></div>
+          <div class="card-desc">Feed logs, metrics, and config to an LLM for natural language diagnosis. "Your gateway crashed because the TUN interface lost its route after a DHCP renewal."</div>
+        </div>
+        <div class="card">
+          <div class="card-title">Self-Evolving Runbooks <span class="tag tag-ai">AI</span></div>
+          <div class="card-desc">Learn from successful recoveries, automatically create new runbook entries. The system gets smarter with every incident.</div>
+        </div>
+        <div class="card">
+          <div class="card-title">Chaos Engineering <span class="tag tag-security">SECURITY</span></div>
+          <div class="card-desc">Controlled fault injection to test recovery paths. Kill processes, corrupt configs, fill disks — verify Aegis handles it. Inspired by Netflix Chaos Monkey.</div>
+        </div>
+        <div class="card">
+          <div class="card-title">Security Scanning <span class="tag tag-security">SECURITY</span></div>
+          <div class="card-desc">Detect exposed ports, weak permissions, outdated dependencies, CVEs in gateway. Continuous security posture monitoring.</div>
+        </div>
+        <div class="card">
+          <div class="card-title">Cross-Service Mesh <span class="tag tag-infra">INFRA</span></div>
+          <div class="card-desc">Monitor not just the gateway but its upstream/downstream dependencies. Full service graph health with cascade failure detection.</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Inspired By Section -->
+<div class="inspired">
+  <h2>Inspired By</h2>
+  <div class="inspired-grid">
+    <div class="inspired-card">
+      <h3>Monit</h3>
+      <p>Process supervision, resource limit checks, automatic restart with configurable cycles, network dependency monitoring, file checksum verification.</p>
+      <div class="inspired-source">Process probes, anti-flap, resource thresholds</div>
+    </div>
+    <div class="inspired-card">
+      <h3>PM2</h3>
+      <p>Cluster mode, graceful reload, memory auto-restart, startup script generation, log management, deployment workflows.</p>
+      <div class="inspired-source">Memory threshold, platform adapters, CLI UX</div>
+    </div>
+    <div class="inspired-card">
+      <h3>Supervisord</h3>
+      <p>Process groups, priority-ordered startup, event listeners, XML-RPC API, log capture and rotation.</p>
+      <div class="inspired-source">Recovery cascade, event logging</div>
+    </div>
+    <div class="inspired-card">
+      <h3>Datadog</h3>
+      <p>Anomaly detection (Watchdog), SLO monitoring, distributed tracing, Prometheus integration, 600+ integrations, alert noise reduction.</p>
+      <div class="inspired-source">Anomaly detection, SLA tracking, metrics export</div>
+    </div>
+    <div class="inspired-card">
+      <h3>PagerDuty</h3>
+      <p>Event Intelligence (ML-powered grouping), runbook automation, incident workflows, on-call scheduling, postmortem templates.</p>
+      <div class="inspired-source">Runbook automation, alert intelligence, incident MTTR</div>
+    </div>
+    <div class="inspired-card">
+      <h3>Grafana/Prometheus</h3>
+      <p>Time-series metrics, PromQL queries, alerting rules, dashboard templates, recording rules for pre-computed aggregates.</p>
+      <div class="inspired-source">Metrics endpoint, health history, observability stack</div>
+    </div>
+    <div class="inspired-card">
+      <h3>Netflix Chaos Monkey</h3>
+      <p>Controlled failure injection in production, resilience verification, blast radius control, scheduled experiments.</p>
+      <div class="inspired-source">Chaos engineering for recovery validation</div>
+    </div>
+    <div class="inspired-card">
+      <h3>Healthchecks.io</h3>
+      <p>Cron job monitoring via pings, grace periods, badge status, multi-channel alerts, simple HTTP API.</p>
+      <div class="inspired-source">Dead man's switch pattern, heartbeat monitoring</div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Keyboard navigation: arrow keys scroll the timeline
+  const wrapper = document.querySelector('.timeline-wrapper');
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowRight') wrapper.scrollBy({ left: 360, behavior: 'smooth' });
+    if (e.key === 'ArrowLeft') wrapper.scrollBy({ left: -360, behavior: 'smooth' });
+  });
+
+  // Mouse wheel horizontal scroll
+  wrapper.addEventListener('wheel', (e) => {
+    if (Math.abs(e.deltaX) < Math.abs(e.deltaY)) {
+      e.preventDefault();
+      wrapper.scrollBy({ left: e.deltaY, behavior: 'auto' });
+    }
+  }, { passive: false });
+
+  // Drag to scroll
+  let isDown = false, startX, scrollLeft;
+  wrapper.addEventListener('mousedown', (e) => {
+    isDown = true;
+    wrapper.style.cursor = 'grabbing';
+    startX = e.pageX - wrapper.offsetLeft;
+    scrollLeft = wrapper.scrollLeft;
+  });
+  wrapper.addEventListener('mouseleave', () => { isDown = false; wrapper.style.cursor = 'grab'; });
+  wrapper.addEventListener('mouseup', () => { isDown = false; wrapper.style.cursor = 'grab'; });
+  wrapper.addEventListener('mousemove', (e) => {
+    if (!isDown) return;
+    e.preventDefault();
+    const x = e.pageX - wrapper.offsetLeft;
+    wrapper.scrollLeft = scrollLeft - (x - startX);
+  });
+  wrapper.style.cursor = 'grab';
+</script>
+
+</body>
+</html>

@@ -75,6 +75,7 @@ Probes: 10 passed, 0 failed
 | [CLI Reference](docs/cli-reference.md) | Every command with examples and options |
 | [Contributing](docs/contributing.md) | Development setup, testing, PR process |
 | [Releasing](docs/releasing.md) | Version bumps, npm publish, GitHub releases |
+| [Roadmap](docs/roadmap.md) | Feature timeline, planned phases, inspiration sources |
 
 ---
 
