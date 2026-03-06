@@ -80,7 +80,10 @@ export class AlertDispatcher {
       }
 
       if (attempt < this.retryAttempts) {
-        const delay = this.retryBackoffMs[attempt] ?? this.retryBackoffMs[this.retryBackoffMs.length - 1] ?? 5000;
+        const delay =
+          this.retryBackoffMs[attempt] ??
+          this.retryBackoffMs[this.retryBackoffMs.length - 1] ??
+          5000;
         await new Promise((r) => setTimeout(r, delay));
       }
     }

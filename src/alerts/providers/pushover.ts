@@ -37,7 +37,7 @@ export class PushoverProvider implements AlertProvider {
         body: new URLSearchParams(params).toString(),
       });
 
-      const data = await response.json() as { status: number; errors?: string[] };
+      const data = (await response.json()) as { status: number; errors?: string[] };
       const ok = data.status === 1;
 
       return {

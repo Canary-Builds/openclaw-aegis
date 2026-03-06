@@ -3,7 +3,11 @@ import * as net from "node:net";
 import * as path from "node:path";
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
-import type { PlatformAdapter, PlatformInstallConfig, PlatformServiceStatus } from "../types/index.js";
+import type {
+  PlatformAdapter,
+  PlatformInstallConfig,
+  PlatformServiceStatus,
+} from "../types/index.js";
 
 const execFileAsync = promisify(execFile);
 
@@ -18,10 +22,7 @@ export class SystemdAdapter implements PlatformAdapter {
     this.watchdogSec = config.watchdogSec;
 
     const unit = this.generateUnitFile(config);
-    const unitPath = path.join(
-      "/etc/systemd/system",
-      `${config.serviceName}.service`,
-    );
+    const unitPath = path.join("/etc/systemd/system", `${config.serviceName}.service`);
 
     fs.writeFileSync(unitPath, unit, { mode: 0o644 });
     await execFileAsync("systemctl", ["daemon-reload"]);
@@ -43,10 +44,7 @@ export class SystemdAdapter implements PlatformAdapter {
 
   async status(): Promise<PlatformServiceStatus> {
     try {
-      const { stdout } = await execFileAsync("systemctl", [
-        "is-active",
-        this.serviceName,
-      ]);
+      const { stdout } = await execFileAsync("systemctl", ["is-active", this.serviceName]);
       const state = stdout.trim();
       if (state === "active") return "running";
       if (state === "inactive") return "stopped";

@@ -10,16 +10,14 @@ export async function tunProbe(_target: ProbeTarget): Promise<HealthProbeResult>
 
   try {
     // Check if any TUN device exists
-    const tunDevices = fs
-      .readdirSync("/sys/class/net")
-      .filter((dev) => {
-        try {
-          const type = fs.readFileSync(`/sys/class/net/${dev}/type`, "utf-8").trim();
-          return type === "65534"; // ARPHRD_NONE — typical for TUN
-        } catch {
-          return false;
-        }
-      });
+    const tunDevices = fs.readdirSync("/sys/class/net").filter((dev) => {
+      try {
+        const type = fs.readFileSync(`/sys/class/net/${dev}/type`, "utf-8").trim();
+        return type === "65534"; // ARPHRD_NONE — typical for TUN
+      } catch {
+        return false;
+      }
+    });
 
     if (tunDevices.length === 0) {
       return {

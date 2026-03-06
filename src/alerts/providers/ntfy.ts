@@ -22,9 +22,9 @@ export class NtfyProvider implements AlertProvider {
       const response = await fetch(url, {
         method: "POST",
         headers: {
-          "Title": alert.title,
-          "Priority": String(this.config.priority),
-          "Tags": alertSeverityToTag(alert.severity),
+          Title: alert.title,
+          Priority: String(this.config.priority),
+          Tags: alertSeverityToTag(alert.severity),
         },
         body: alert.body,
       });
@@ -62,8 +62,11 @@ export class NtfyProvider implements AlertProvider {
 
 function alertSeverityToTag(severity: string): string {
   switch (severity) {
-    case "critical": return "rotating_light";
-    case "warning": return "warning";
-    default: return "information_source";
+    case "critical":
+      return "rotating_light";
+    case "warning":
+      return "warning";
+    default:
+      return "information_source";
   }
 }

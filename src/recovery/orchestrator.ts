@@ -30,11 +30,7 @@ export class RecoveryOrchestrator extends EventEmitter {
   private readonly backupManager: BackupManager;
   private recovering = false;
 
-  constructor(
-    config: AegisConfig,
-    diagnosisEngine: DiagnosisEngine,
-    backupManager: BackupManager,
-  ) {
+  constructor(config: AegisConfig, diagnosisEngine: DiagnosisEngine, backupManager: BackupManager) {
     super();
     this.config = config;
     this.diagnosisEngine = diagnosisEngine;
@@ -79,7 +75,10 @@ export class RecoveryOrchestrator extends EventEmitter {
       }
 
       if (!l2Result.success && l2Result.noMatch) {
-        this.emitEvent({ type: "FAST_PATH_L4", reason: "L1 preflight failed and L2 has no matching pattern" });
+        this.emitEvent({
+          type: "FAST_PATH_L4",
+          reason: "L1 preflight failed and L2 has no matching pattern",
+        });
       }
 
       this.circuitBreaker.recordFailedCycle();
@@ -122,11 +121,21 @@ export class RecoveryOrchestrator extends EventEmitter {
       const start = Date.now();
       try {
         await execFileAsync("openclaw", ["gateway", "restart"], { timeout: 30000 });
-        actions.push({ level: "L1", action: "restart", result: "success", durationMs: Date.now() - start });
+        actions.push({
+          level: "L1",
+          action: "restart",
+          result: "success",
+          durationMs: Date.now() - start,
+        });
         this.emitEvent({ type: "L1_SUCCESS" });
         return { success: true, actions };
       } catch {
-        actions.push({ level: "L1", action: "restart", result: "failure", durationMs: Date.now() - start });
+        actions.push({
+          level: "L1",
+          action: "restart",
+          result: "failure",
+          durationMs: Date.now() - start,
+        });
       }
 
       if (attempt < maxAttempts) {
@@ -138,7 +147,11 @@ export class RecoveryOrchestrator extends EventEmitter {
     return { success: false, actions };
   }
 
-  private async attemptL2(): Promise<{ success: boolean; actions: RecoveryAction[]; noMatch: boolean }> {
+  private async attemptL2(): Promise<{
+    success: boolean;
+    actions: RecoveryAction[];
+    noMatch: boolean;
+  }> {
     const actions: RecoveryAction[] = [];
 
     const context: DiagnosisContext = {

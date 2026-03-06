@@ -15,16 +15,19 @@ export class DiscordProvider implements AlertProvider {
 
   async send(alert: AlertPayload): Promise<AlertResult> {
     const start = Date.now();
-    const color = alert.severity === "critical" ? 0xED4245 : alert.severity === "warning" ? 0xFEE75C : 0x57F287;
+    const color =
+      alert.severity === "critical" ? 0xed4245 : alert.severity === "warning" ? 0xfee75c : 0x57f287;
 
     const payload: Record<string, unknown> = {
-      embeds: [{
-        title: alert.title,
-        description: alert.body,
-        color,
-        timestamp: alert.timestamp,
-        footer: { text: "OpenClaw Aegis" },
-      }],
+      embeds: [
+        {
+          title: alert.title,
+          description: alert.body,
+          color,
+          timestamp: alert.timestamp,
+          footer: { text: "OpenClaw Aegis" },
+        },
+      ],
     };
     if (this.config.username) {
       payload.username = this.config.username;

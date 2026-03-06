@@ -22,7 +22,12 @@ export class EmailProvider implements AlertProvider {
 
   async send(alert: AlertPayload): Promise<AlertResult> {
     const start = Date.now();
-    const icon = alert.severity === "critical" ? "[CRITICAL]" : alert.severity === "warning" ? "[WARNING]" : "[INFO]";
+    const icon =
+      alert.severity === "critical"
+        ? "[CRITICAL]"
+        : alert.severity === "warning"
+          ? "[WARNING]"
+          : "[INFO]";
     const subject = `${icon} ${alert.title}`;
 
     try {
@@ -166,64 +171,72 @@ export class EmailProvider implements AlertProvider {
               plain.write("STARTTLS\r\n");
               startTlsSent = true;
             } else if (code === 220 && startTlsSent) {
-              socket = tls.connect({
-                socket: plain,
-                host: this.config.host,
-                rejectUnauthorized: true,
-              }, () => {
-                let step2 = 0;
-                let buffer2 = "";
-                const cmds = [
-                  `EHLO aegis\r\n`,
-                  `AUTH LOGIN\r\n`,
-                  `${Buffer.from(this.config.username).toString("base64")}\r\n`,
-                  `${Buffer.from(this.config.password).toString("base64")}\r\n`,
-                  `MAIL FROM:<${this.config.from}>\r\n`,
-                  `RCPT TO:<${this.config.to}>\r\n`,
-                  `DATA\r\n`,
-                  `From: ${this.config.from}\r\nTo: ${this.config.to}\r\nSubject: ${subject}\r\nContent-Type: text/plain; charset=utf-8\r\nX-Mailer: OpenClaw-Aegis\r\n\r\n${body}\r\n.\r\n`,
-                  `QUIT\r\n`,
-                ];
+              socket = tls.connect(
+                {
+                  socket: plain,
+                  host: this.config.host,
+                  rejectUnauthorized: true,
+                },
+                () => {
+                  let step2 = 0;
+                  let buffer2 = "";
+                  const cmds = [
+                    `EHLO aegis\r\n`,
+                    `AUTH LOGIN\r\n`,
+                    `${Buffer.from(this.config.username).toString("base64")}\r\n`,
+                    `${Buffer.from(this.config.password).toString("base64")}\r\n`,
+                    `MAIL FROM:<${this.config.from}>\r\n`,
+                    `RCPT TO:<${this.config.to}>\r\n`,
+                    `DATA\r\n`,
+                    `From: ${this.config.from}\r\nTo: ${this.config.to}\r\nSubject: ${subject}\r\nContent-Type: text/plain; charset=utf-8\r\nX-Mailer: OpenClaw-Aegis\r\n\r\n${body}\r\n.\r\n`,
+                    `QUIT\r\n`,
+                  ];
 
-                socket.write(cmds[0]);
-                step2 = 1;
+                  socket.write(cmds[0]);
+                  step2 = 1;
 
-                socket.on("data", (d: Buffer) => {
-                  buffer2 += d.toString();
-                  const ls = buffer2.split("\r\n");
-                  buffer2 = ls.pop() ?? "";
+                  socket.on("data", (d: Buffer) => {
+                    buffer2 += d.toString();
+                    const ls = buffer2.split("\r\n");
+                    buffer2 = ls.pop() ?? "";
 
-                  for (const l of ls) {
-                    if (!l) continue;
-                    const c = parseInt(l.substring(0, 3), 10);
-                    if (l.charAt(3) === "-") continue;
+                    for (const l of ls) {
+                      if (!l) continue;
+                      const c = parseInt(l.substring(0, 3), 10);
+                      if (l.charAt(3) === "-") continue;
 
-                    if (c >= 400) {
-                      socket.destroy();
-                      reject(new Error(`SMTP error: ${l}`));
-                      return;
+                      if (c >= 400) {
+                        socket.destroy();
+                        reject(new Error(`SMTP error: ${l}`));
+                        return;
+                      }
+
+                      if (step2 < cmds.length) {
+                        socket.write(cmds[step2]);
+                        step2++;
+                      }
+
+                      if (step2 >= cmds.length && c === 221) {
+                        socket.end();
+                        resolve();
+                        return;
+                      }
                     }
-
-                    if (step2 < cmds.length) {
-                      socket.write(cmds[step2]);
-                      step2++;
-                    }
-
-                    if (step2 >= cmds.length && c === 221) {
-                      socket.end();
-                      resolve();
-                      return;
-                    }
-                  }
-                });
-              });
+                  });
+                },
+              );
               return;
             }
           }
         });
 
-        plain.on("timeout", () => { plain.destroy(); reject(new Error("SMTP connection timed out")); });
-        plain.on("error", (err: Error) => { reject(new Error(`SMTP error: ${err.message}`)); });
+        plain.on("timeout", () => {
+          plain.destroy();
+          reject(new Error("SMTP connection timed out"));
+        });
+        plain.on("error", (err: Error) => {
+          reject(new Error(`SMTP error: ${err.message}`));
+        });
       } else {
         connect();
       }

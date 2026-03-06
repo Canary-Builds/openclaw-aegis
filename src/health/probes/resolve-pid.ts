@@ -19,11 +19,11 @@ export function resolvePid(pidSource: string): number | null {
 
 function resolveFromSystemd(unit: string): number | null {
   try {
-    const output = execFileSync(
-      "systemctl",
-      ["--user", "show", "-p", "MainPID", "--value", unit],
-      { encoding: "utf-8", timeout: 3000, stdio: ["pipe", "pipe", "pipe"] },
-    ).trim();
+    const output = execFileSync("systemctl", ["--user", "show", "-p", "MainPID", "--value", unit], {
+      encoding: "utf-8",
+      timeout: 3000,
+      stdio: ["pipe", "pipe", "pipe"],
+    }).trim();
 
     const pid = parseInt(output, 10);
     if (!isNaN(pid) && pid > 0) return pid;

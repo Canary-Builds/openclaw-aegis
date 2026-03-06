@@ -25,7 +25,9 @@ function parseIncident(filePath: string): IncidentSummary {
   for (const line of lines) {
     try {
       events.push(JSON.parse(line) as IncidentEvent);
-    } catch { /* skip malformed lines */ }
+    } catch {
+      /* skip malformed lines */
+    }
   }
 
   const started = events[0]?.timestamp ?? "unknown";
@@ -61,7 +63,8 @@ export const incidentsCommand = new Command("incidents")
       return;
     }
 
-    const files = fs.readdirSync(incidentsDir)
+    const files = fs
+      .readdirSync(incidentsDir)
       .filter((f) => f.endsWith(".jsonl"))
       .sort()
       .reverse();
@@ -87,7 +90,8 @@ export const incidentsCommand = new Command("incidents")
       }
 
       const status = incident.resolved ? "\x1b[32mRESOLVED\x1b[0m" : "\x1b[31mUNRESOLVED\x1b[0m";
-      const duration = incident.durationMs !== null ? formatDuration(incident.durationMs) : "ongoing";
+      const duration =
+        incident.durationMs !== null ? formatDuration(incident.durationMs) : "ongoing";
       console.log(`\nIncident: ${incident.id}`);
       console.log(`Status:   ${status}`);
       console.log(`Started:  ${incident.started}`);
@@ -116,7 +120,9 @@ export const incidentsCommand = new Command("incidents")
 
     const resolved = incidents.filter((i) => i.resolved).length;
     const unresolved = incidents.length - resolved;
-    console.log(`\n${incidents.length} incident(s) — ${resolved} resolved, ${unresolved} unresolved\n`);
+    console.log(
+      `\n${incidents.length} incident(s) — ${resolved} resolved, ${unresolved} unresolved\n`,
+    );
 
     for (const inc of incidents) {
       const icon = inc.resolved ? "\x1b[32m+\x1b[0m" : "\x1b[31m-\x1b[0m";
@@ -131,17 +137,28 @@ export const incidentsCommand = new Command("incidents")
 
 function eventIcon(type: string): string {
   switch (type) {
-    case "INCIDENT_START": return "\x1b[31m>\x1b[0m";
-    case "L1_ATTEMPT": return "\x1b[33m~\x1b[0m";
-    case "L1_SUCCESS": return "\x1b[32m+\x1b[0m";
-    case "L2_ATTEMPT": return "\x1b[33m~\x1b[0m";
-    case "L2_SUCCESS": return "\x1b[32m+\x1b[0m";
-    case "L4_ALERT": return "\x1b[31m!\x1b[0m";
-    case "INCIDENT_RESOLVED": return "\x1b[32m+\x1b[0m";
-    case "INCIDENT_UNRESOLVED": return "\x1b[31mx\x1b[0m";
-    case "DEAD_MAN_SWITCH_ROLLBACK": return "\x1b[33m<\x1b[0m";
-    case "CIRCUIT_BREAKER_TRIPPED": return "\x1b[31m#\x1b[0m";
-    default: return " ";
+    case "INCIDENT_START":
+      return "\x1b[31m>\x1b[0m";
+    case "L1_ATTEMPT":
+      return "\x1b[33m~\x1b[0m";
+    case "L1_SUCCESS":
+      return "\x1b[32m+\x1b[0m";
+    case "L2_ATTEMPT":
+      return "\x1b[33m~\x1b[0m";
+    case "L2_SUCCESS":
+      return "\x1b[32m+\x1b[0m";
+    case "L4_ALERT":
+      return "\x1b[31m!\x1b[0m";
+    case "INCIDENT_RESOLVED":
+      return "\x1b[32m+\x1b[0m";
+    case "INCIDENT_UNRESOLVED":
+      return "\x1b[31mx\x1b[0m";
+    case "DEAD_MAN_SWITCH_ROLLBACK":
+      return "\x1b[33m<\x1b[0m";
+    case "CIRCUIT_BREAKER_TRIPPED":
+      return "\x1b[31m#\x1b[0m";
+    default:
+      return " ";
   }
 }
 

@@ -45,9 +45,7 @@ export async function diskProbe(
       name: "disk",
       healthy,
       score: healthy ? 2 : 0,
-      message: healthy
-        ? undefined
-        : `Only ${availMb}MB available (threshold: ${thresholdMb}MB)`,
+      message: healthy ? undefined : `Only ${availMb}MB available (threshold: ${thresholdMb}MB)`,
       latencyMs: Date.now() - start,
     };
   } catch (err) {

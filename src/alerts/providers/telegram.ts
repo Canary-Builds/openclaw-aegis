@@ -16,7 +16,12 @@ export class TelegramProvider implements AlertProvider {
   async send(alert: AlertPayload): Promise<AlertResult> {
     const start = Date.now();
     const url = `https://api.telegram.org/bot${this.config.botToken}/sendMessage`;
-    const icon = alert.severity === "critical" ? "\u{1F6A8}" : alert.severity === "warning" ? "\u{26A0}\u{FE0F}" : "\u{2139}\u{FE0F}";
+    const icon =
+      alert.severity === "critical"
+        ? "\u{1F6A8}"
+        : alert.severity === "warning"
+          ? "\u{26A0}\u{FE0F}"
+          : "\u{2139}\u{FE0F}";
     const text = `${icon} *${escapeMarkdown(alert.title)}*\n\n${escapeMarkdown(alert.body)}`;
 
     try {
@@ -30,7 +35,7 @@ export class TelegramProvider implements AlertProvider {
         }),
       });
 
-      const data = await response.json() as { ok: boolean; description?: string };
+      const data = (await response.json()) as { ok: boolean; description?: string };
 
       return {
         provider: this.name,

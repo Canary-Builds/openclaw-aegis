@@ -19,7 +19,9 @@ export const statusCommand = new Command("status")
     const reset = "\x1b[0m";
     const color = bandColors[score.band] ?? "";
 
-    process.stdout.write(`\nHealth: ${color}${score.band.toUpperCase()}${reset} (score: ${score.total})\n\n`);
+    process.stdout.write(
+      `\nHealth: ${color}${score.band.toUpperCase()}${reset} (score: ${score.total})\n\n`,
+    );
 
     for (const probe of score.probeResults) {
       const icon = probe.healthy ? "\x1b[32m+\x1b[0m" : "\x1b[31m-\x1b[0m";
