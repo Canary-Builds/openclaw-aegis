@@ -83,6 +83,10 @@ openclaw-aegis/
         ntfy.ts             # ntfy.sh push notifications
         telegram.ts         # Telegram Bot API
         whatsapp.ts         # WhatsApp Business Cloud API
+        slack.ts            # Slack Incoming Webhooks
+        discord.ts          # Discord Webhooks with embeds
+        email.ts            # SMTP email (STARTTLS/TLS)
+        pushover.ts         # Pushover push notifications
         webhook.ts          # Generic webhook with HMAC signing
     daemon/
       index.ts              # Main daemon class

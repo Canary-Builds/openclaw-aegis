@@ -28,6 +28,27 @@ const alertChannelSchema = z.discriminatedUnion("type", [
     webhookUrl: z.string().url(),
     channel: z.string().optional(),
   }),
+  z.object({
+    type: z.literal("discord"),
+    webhookUrl: z.string().url(),
+    username: z.string().optional(),
+  }),
+  z.object({
+    type: z.literal("email"),
+    host: z.string().min(1),
+    port: z.number().int().min(1).max(65535).default(587),
+    secure: z.boolean().default(false),
+    username: z.string().min(1),
+    password: z.string().min(1),
+    from: z.string().min(1),
+    to: z.string().min(1),
+  }),
+  z.object({
+    type: z.literal("pushover"),
+    apiToken: z.string().min(1),
+    userKey: z.string().min(1),
+    device: z.string().optional(),
+  }),
 ]);
 
 export type AlertChannelConfig = z.infer<typeof alertChannelSchema>;

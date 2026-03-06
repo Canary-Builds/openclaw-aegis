@@ -139,6 +139,104 @@ channel = "#alerts"
 
 ---
 
+### Discord
+
+Sends rich embed messages via [Discord Webhooks](https://discord.com/developers/docs/resources/webhook). Alerts are color-coded by severity.
+
+```toml
+[[alerts.channels]]
+type = "discord"
+webhookUrl = "https://discord.com/api/webhooks/YOUR/WEBHOOK_URL"
+username = "Aegis"
+```
+
+| Key | Type | Required | Description |
+|-----|------|----------|-------------|
+| `type` | `"discord"` | yes | Provider identifier |
+| `webhookUrl` | string | yes | Discord Webhook URL |
+| `username` | string | no | Bot display name override |
+
+**Setup:**
+
+1. In your Discord server, go to **Server Settings > Integrations > Webhooks**
+2. Click **New Webhook**, select the channel, and copy the URL
+3. Add the config above
+4. Run `aegis test-alert` to verify
+
+Embeds are color-coded: red for critical, yellow for warning, green for info.
+
+---
+
+### Email (SMTP)
+
+Sends alerts via SMTP. Supports STARTTLS (port 587) and direct TLS (port 465).
+
+```toml
+[[alerts.channels]]
+type = "email"
+host = "smtp.gmail.com"
+port = 587
+secure = false
+username = "you@gmail.com"
+password = "app-password-here"
+from = "aegis@yourdomain.com"
+to = "alerts@yourdomain.com"
+```
+
+| Key | Type | Required | Default | Description |
+|-----|------|----------|---------|-------------|
+| `type` | `"email"` | yes | | Provider identifier |
+| `host` | string | yes | | SMTP server hostname |
+| `port` | integer | no | `587` | SMTP port |
+| `secure` | boolean | no | `false` | Direct TLS (port 465). If false and port is 587, uses STARTTLS |
+| `username` | string | yes | | SMTP authentication username |
+| `password` | string | yes | | SMTP authentication password |
+| `from` | string | yes | | Sender email address |
+| `to` | string | yes | | Recipient email address |
+
+**Setup (Gmail):**
+
+1. Enable 2FA on your Google account
+2. Go to [App Passwords](https://myaccount.google.com/apppasswords) and generate one
+3. Use the app password (not your real password) in the config
+4. Run `aegis test-alert` to verify
+
+**Other providers:** Works with any SMTP server — Outlook, Fastmail, self-hosted Postfix, Amazon SES, etc.
+
+---
+
+### Pushover
+
+Sends push notifications via [Pushover](https://pushover.net/). Supports priority levels and quiet hours.
+
+```toml
+[[alerts.channels]]
+type = "pushover"
+apiToken = "your-app-api-token"
+userKey = "your-user-key"
+device = "myphone"
+```
+
+| Key | Type | Required | Description |
+|-----|------|----------|-------------|
+| `type` | `"pushover"` | yes | Provider identifier |
+| `apiToken` | string | yes | Application API token |
+| `userKey` | string | yes | Your user key |
+| `device` | string | no | Target specific device |
+
+**Setup:**
+
+1. Create an account at [pushover.net](https://pushover.net/)
+2. Install the Pushover app on your phone
+3. Copy your **User Key** from the dashboard
+4. [Create an application](https://pushover.net/apps/build) and copy its **API Token**
+5. Add the config above
+6. Run `aegis test-alert` to verify
+
+Priority mapping: critical = high priority (bypasses quiet hours), warning = normal, info = low.
+
+---
+
 ### Webhook
 
 Sends a JSON POST to any URL. Optionally signed with HMAC-SHA256 for verification.

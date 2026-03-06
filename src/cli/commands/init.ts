@@ -124,11 +124,11 @@ export const initCommand = new Command("init")
 
       // Alert channels
       console.log("\n  Alert Channels (out-of-band — never through the gateway)\n");
-      console.log("  Supported: ntfy, telegram, whatsapp, slack, webhook\n");
+      console.log("  Supported: ntfy, telegram, whatsapp, slack, discord, email, pushover, webhook\n");
 
       let addMore = true;
       while (addMore) {
-        const channelType = await ask(rl, "Add alert channel? (ntfy/telegram/whatsapp/slack/webhook/skip)", "skip");
+        const channelType = await ask(rl, "Add alert channel? (ntfy/telegram/whatsapp/slack/discord/email/pushover/webhook/skip)", "skip");
 
         if (channelType === "skip" || channelType === "") {
           addMore = false;
@@ -176,6 +176,51 @@ export const initCommand = new Command("init")
               console.log("  Added Slack channel\n");
             } else {
               console.log("  Skipped — webhook URL required\n");
+            }
+            break;
+          }
+          case "discord": {
+            const webhookUrl = await ask(rl, "  Discord Webhook URL");
+            if (webhookUrl) {
+              const username = await ask(rl, "  Bot display name (optional)", "Aegis");
+              const ch: { type: string; webhookUrl: string; username?: string } = { type: "discord", webhookUrl };
+              if (username && username !== "Aegis") ch.username = username;
+              channels.push(ch);
+              console.log("  Added Discord channel\n");
+            } else {
+              console.log("  Skipped — webhook URL required\n");
+            }
+            break;
+          }
+          case "email": {
+            const host = await ask(rl, "  SMTP host (e.g. smtp.gmail.com)");
+            const portStr = await ask(rl, "  SMTP port", "587");
+            const username = await ask(rl, "  SMTP username");
+            const password = await ask(rl, "  SMTP password");
+            const from = await ask(rl, "  From address");
+            const to = await ask(rl, "  To address");
+            if (host && username && password && from && to) {
+              channels.push({
+                type: "email", host, port: parseInt(portStr, 10) || 587,
+                secure: 0, username, password, from, to,
+              });
+              console.log("  Added Email channel\n");
+            } else {
+              console.log("  Skipped — all fields required\n");
+            }
+            break;
+          }
+          case "pushover": {
+            const apiToken = await ask(rl, "  Pushover API token (from your app)");
+            const userKey = await ask(rl, "  Pushover user key");
+            if (apiToken && userKey) {
+              const device = await ask(rl, "  Device name (optional)");
+              const ch: { type: string; apiToken: string; userKey: string; device?: string } = { type: "pushover", apiToken, userKey };
+              if (device) ch.device = device;
+              channels.push(ch);
+              console.log("  Added Pushover channel\n");
+            } else {
+              console.log("  Skipped — API token and user key required\n");
             }
             break;
           }

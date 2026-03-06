@@ -4,6 +4,7 @@
 
 Aegis monitors your OpenClaw gateway, detects failures in seconds, fixes them automatically, and alerts you through out-of-band channels that don't depend on the gateway being up.
 
+[![npm](https://img.shields.io/npm/v/openclaw-aegis)](https://www.npmjs.com/package/openclaw-aegis)
 [![CI](https://github.com/Canary-Builds/openclaw-aegis/actions/workflows/ci.yml/badge.svg)](https://github.com/Canary-Builds/openclaw-aegis/actions/workflows/ci.yml)
 [![Node.js](https://img.shields.io/badge/node-%3E%3D18-brightgreen)](https://nodejs.org)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
@@ -19,7 +20,7 @@ Aegis prevents this:
 1. **Detects** failures via 10 health probes (process, port, config, memory, CPU, disk, logs, network, WebSocket, HTTP)
 2. **Diagnoses** the root cause using 6 failure pattern matchers
 3. **Fixes** automatically — restores known-good config, clears stale PIDs, runs safe `doctor --fix`
-4. **Alerts** you through channels that bypass the gateway entirely (ntfy, Telegram, WhatsApp, Slack, webhook)
+4. **Alerts** you through channels that bypass the gateway entirely (ntfy, Telegram, WhatsApp, Slack, Discord, Email, Pushover, webhook)
 
 **Total downtime: ~15 seconds instead of hours.**
 
@@ -66,7 +67,7 @@ Probes: 10 passed, 0 failed
 | [Getting Started](docs/getting-started.md) | Installation, first setup, verification |
 | [Architecture](docs/architecture.md) | System design, probe pipeline, recovery tiers |
 | [Configuration](docs/configuration.md) | Full TOML reference with every option |
-| [Alerts](docs/alerts.md) | Setting up ntfy, Telegram, WhatsApp, webhooks |
+| [Alerts](docs/alerts.md) | Setting up ntfy, Telegram, WhatsApp, Slack, Discord, Email, Pushover, webhooks |
 | [CLI Reference](docs/cli-reference.md) | Every command with examples and options |
 | [Contributing](docs/contributing.md) | Development setup, testing, PR process |
 
@@ -75,7 +76,7 @@ Probes: 10 passed, 0 failed
 ## How It Works
 
 ```
-OpenClaw Gateway (Raven)          Aegis Sidecar
+OpenClaw Gateway                  Aegis Sidecar
 ┌─────────────────────┐          ┌──────────────────────────────┐
 │                     │          │  Health Monitor (10 probes)  │
 │  ~/.openclaw/       │◄────────►│  Config Guardian             │
@@ -85,7 +86,7 @@ OpenClaw Gateway (Raven)          Aegis Sidecar
 │  systemd service    │◄─────────│    L2: Targeted Repair       │
 │                     │          │    L4: Human Alert           │
 └─────────────────────┘          │  Alert Dispatcher            │
-                                 │  (ntfy/TG/WA/Slack/Webhook) │
+                                 │  (8 alert providers)         │
                                  └──────────────────────────────┘
                                           │
                                     Out-of-band

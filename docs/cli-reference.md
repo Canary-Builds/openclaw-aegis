@@ -15,7 +15,7 @@ aegis init [--auto]
 **Interactive mode** prompts for:
 1. Gateway port (auto-detected from `~/.openclaw/openclaw.json`)
 2. Memory threshold (default: 768MB)
-3. Alert channels (ntfy, Telegram, WhatsApp, webhook)
+3. Alert channels (ntfy, Telegram, WhatsApp, Slack, Discord, Email, Pushover, webhook)
 
 Writes config to `~/.openclaw/aegis/config.toml` and runs a health check to verify.
 

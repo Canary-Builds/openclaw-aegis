@@ -174,6 +174,9 @@ Supported providers:
 - **Telegram** — direct Telegram Bot API
 - **WhatsApp** — Meta WhatsApp Business Cloud API
 - **Slack** — Incoming Webhooks with mrkdwn formatting
+- **Discord** — Webhooks with rich embeds, color-coded by severity
+- **Email** — SMTP with STARTTLS/TLS support
+- **Pushover** — push notifications with priority levels
 - **Webhook** — generic HTTP POST with HMAC-SHA256 signing
 
 Each alert is scrubbed for sensitive data (tokens, keys, passwords) before dispatch.

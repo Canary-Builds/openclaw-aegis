@@ -6,6 +6,9 @@ import { TelegramProvider } from "../../alerts/providers/telegram.js";
 import { WhatsAppProvider } from "../../alerts/providers/whatsapp.js";
 import { WebhookProvider } from "../../alerts/providers/webhook.js";
 import { SlackProvider } from "../../alerts/providers/slack.js";
+import { DiscordProvider } from "../../alerts/providers/discord.js";
+import { EmailProvider } from "../../alerts/providers/email.js";
+import { PushoverProvider } from "../../alerts/providers/pushover.js";
 import type { AlertPayload } from "../../types/index.js";
 
 export const testAlertCommand = new Command("test-alert")
@@ -37,6 +40,15 @@ export const testAlertCommand = new Command("test-alert")
           break;
         case "slack":
           dispatcher.addProvider(new SlackProvider(ch));
+          break;
+        case "discord":
+          dispatcher.addProvider(new DiscordProvider(ch));
+          break;
+        case "email":
+          dispatcher.addProvider(new EmailProvider(ch));
+          break;
+        case "pushover":
+          dispatcher.addProvider(new PushoverProvider(ch));
           break;
       }
     }

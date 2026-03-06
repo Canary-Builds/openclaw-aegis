@@ -29,10 +29,14 @@ All notable changes to OpenClaw Aegis are documented here.
   - Chronological snapshots (last 20)
   - Known-good configs promoted after 60s stability (last 5)
   - Atomic writes with SHA-256 integrity verification
-- **Alert Dispatcher** with 4 out-of-band providers:
+- **Alert Dispatcher** with 8 out-of-band providers:
   - ntfy (push notifications)
   - Telegram (Bot API with MarkdownV2)
   - WhatsApp (Business Cloud API)
+  - Slack (Incoming Webhooks with mrkdwn)
+  - Discord (Webhooks with rich embeds, color-coded)
+  - Email (SMTP with STARTTLS/TLS)
+  - Pushover (push notifications with priority mapping)
   - Webhook (HTTP POST with HMAC-SHA256 signing)
 - **Sensitive data scrubbing** on all outbound alerts
 - **Alert retry** with configurable exponential backoff
