@@ -52,14 +52,14 @@ Every 10s:
 
 | Probe | Weight | What It Checks | Failure Indicates |
 |-------|--------|----------------|-------------------|
-| **process** | 2 | PID alive via systemd or `kill -0` | Crash, OOM kill |
+| **process** | 2 | PID alive via systemd/launchd or `kill -0` | Crash, OOM kill |
 | **port** | 2 | TCP connect to gateway port | Zombie process, port conflict |
 | **http** | 2 | `openclaw gateway health` exit code | Internal gateway error |
 | **config** | 2 | Valid JSON, required keys, no poison keys | Config corruption |
 | **websocket** | 1 | WS handshake to gateway | Protocol/auth failure |
 | **tun** | 1 | Default route exists, TUN if configured | Network issues |
-| **memory** | 1 | RSS below threshold | Memory leak, approaching OOM |
-| **cpu** | 1 | CPU % below threshold over 1s sample | Infinite loop, runaway |
+| **memory** | 1 | RSS below threshold (via `/proc` on Linux, `ps` on macOS) | Memory leak, approaching OOM |
+| **cpu** | 1 | CPU % below threshold (via `/proc` on Linux, `ps` on macOS) | Infinite loop, runaway |
 | **disk** | 1 | Sufficient space on config partition | Disk full |
 | **logTail** | 1 | Recent error patterns in gateway logs | Emerging issues |
 
@@ -74,12 +74,13 @@ Degraded requires N consecutive confirmations before escalation (default: 2) to 
 
 ### PID Resolution
 
-Aegis resolves the gateway PID using a two-step strategy:
+Aegis resolves the gateway PID using a platform-aware strategy:
 
-1. **systemd** (primary): `systemctl --user show -p MainPID openclaw-gateway.service`
-2. **PID file** (fallback): reads the configured PID file path
+1. **launchd** (macOS): `launchctl list <label>` — parses PID from output
+2. **systemd** (Linux): `systemctl --user show -p MainPID <unit>`
+3. **PID file** (fallback): reads the configured PID file path
 
-This handles the standard OpenClaw installation (systemd user service) and custom setups.
+Platform is auto-detected at runtime. This handles standard OpenClaw installations on both Linux (systemd user service) and macOS (launchd), plus custom setups using PID files.
 
 ## Config Guardian
 

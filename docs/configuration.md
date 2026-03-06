@@ -7,7 +7,7 @@ Aegis is configured via TOML at `~/.openclaw/aegis/config.toml`. Run `aegis init
 ```toml
 [gateway]
 configPath = "~/.openclaw/openclaw.json"
-pidFile = "openclaw-gateway.service"          # systemd unit name or path to PID file
+pidFile = "openclaw-gateway.service"          # systemd unit, launchd label, or PID file path
 port = 18789
 logPath = "~/.openclaw/logs/gateway.log"
 healthEndpoint = "/health"
@@ -97,14 +97,17 @@ watchdogSec = 30
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
 | `configPath` | string | `~/.openclaw/openclaw.json` | Path to OpenClaw gateway config |
-| `pidFile` | string | `openclaw-gateway.service` | systemd unit name or PID file path |
+| `pidFile` | string | `openclaw-gateway.service` | systemd unit name, launchd label, or PID file path |
 | `port` | integer | `18789` | Gateway port (auto-detected by `aegis init`) |
 | `logPath` | string | `~/.openclaw/logs/gateway.log` | Gateway log file path |
 | `healthEndpoint` | string | `/health` | HTTP health check endpoint |
 
-**pidFile** accepts two formats:
-- **systemd unit name**: `openclaw-gateway.service` — resolves PID via `systemctl --user show`
+**pidFile** accepts three formats:
+- **launchd label** (macOS): `ai.openclaw.gateway` — resolves PID via `launchctl list`
+- **systemd unit name** (Linux): `openclaw-gateway.service` — resolves PID via `systemctl --user show`
 - **File path**: `~/.openclaw/gateway.pid` — reads PID from file
+
+Platform is auto-detected. `aegis init --auto` sets the correct default for your OS.
 
 ### `[monitoring]`
 

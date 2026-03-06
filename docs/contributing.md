@@ -66,7 +66,7 @@ openclaw-aegis/
         cpu.ts              # CPU percentage
         disk.ts             # Free disk space
         log-tail.ts         # Error pattern scanning
-        resolve-pid.ts      # Shared PID resolution (systemd + file)
+        resolve-pid.ts      # Shared PID resolution (launchd + systemd + file)
     recovery/
       orchestrator.ts       # L1/L2/L4 recovery cascade
       circuit-breaker.ts    # Circuit breaker for recovery loops
@@ -138,7 +138,7 @@ describe("loadConfig", () => {
 
 Key testing patterns:
 - Mock `fs` operations for file-dependent probes
-- Mock `child_process` for systemd/process probes
+- Mock `child_process` for systemd/launchd/process probes
 - Use real config files in `tests/fixtures/` for integration tests
 
 ## Code Quality
