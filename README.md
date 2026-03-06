@@ -17,7 +17,7 @@ When your OpenClaw gateway goes down, **everything goes dark** — Telegram, Wha
 
 **Aegis doesn't let that happen.**
 
-It stands between your gateway and disaster — a tireless sentinel that detects failures in seconds, diagnoses the root cause, repairs what it can, and sounds the alarm through channels that never touch the gateway.
+It stands between your gateway and disaster — a tireless sentinel that detects failures in seconds, diagnoses the root cause, repairs what it can, and alerts you through channels that bypass the gateway entirely.
 
 ### What It Does
 
