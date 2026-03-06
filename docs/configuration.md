@@ -85,6 +85,32 @@ apiToken = "your-app-api-token"
 userKey = "your-user-key"
 device = "myphone"                               # optional target device
 
+[api]
+enabled = true                                 # enable REST API server
+port = 3001                                    # API port
+host = "127.0.0.1"                             # bind address (localhost only)
+
+[bot]
+enabled = true                                 # enable bot command listeners
+
+[bot.telegram]
+enabled = true                                 # reuses alert channel botToken/chatId
+
+[bot.whatsapp]
+enabled = true
+webhookPort = 3002                             # Meta sends callbacks here
+verifyToken = "aegis-verify"
+
+[bot.slack]
+enabled = true
+webhookPort = 3003
+signingSecret = "your-slack-signing-secret"    # optional, for request verification
+
+[bot.discord]
+enabled = true
+botToken = "your-discord-bot-token"
+channelId = "your-channel-id"
+
 [platform]
 type = "systemd"                               # "systemd" or "launchd"
 watchdogSec = 30
@@ -175,6 +201,50 @@ Platform is auto-detected. `aegis init --auto` sets the correct default for your
 ### `[[alerts.channels]]`
 
 See [Alerts](alerts.md) for channel configuration.
+
+### `[api]`
+
+| Key | Type | Default | Description |
+|-----|------|---------|-------------|
+| `enabled` | boolean | `false` | Enable REST API server |
+| `port` | integer | `3001` | API port |
+| `host` | string | `127.0.0.1` | Bind address |
+
+### `[bot]`
+
+| Key | Type | Default | Description |
+|-----|------|---------|-------------|
+| `enabled` | boolean | `false` | Enable bot command listeners |
+
+#### `[bot.telegram]`
+
+| Key | Type | Default | Description |
+|-----|------|---------|-------------|
+| `enabled` | boolean | `false` | Enable Telegram bot (reuses alert channel credentials) |
+
+#### `[bot.whatsapp]`
+
+| Key | Type | Default | Description |
+|-----|------|---------|-------------|
+| `enabled` | boolean | `false` | Enable WhatsApp bot |
+| `webhookPort` | integer | `3002` | Port for Meta webhook callbacks |
+| `verifyToken` | string | `aegis-verify` | Webhook verification token |
+
+#### `[bot.slack]`
+
+| Key | Type | Default | Description |
+|-----|------|---------|-------------|
+| `enabled` | boolean | `false` | Enable Slack slash commands |
+| `webhookPort` | integer | `3003` | Port for Slack slash command requests |
+| `signingSecret` | string | — | Slack signing secret for request verification |
+
+#### `[bot.discord]`
+
+| Key | Type | Default | Description |
+|-----|------|---------|-------------|
+| `enabled` | boolean | `false` | Enable Discord bot |
+| `botToken` | string | — | Discord bot token |
+| `channelId` | string | — | Channel to listen in |
 
 ### `[platform]`
 

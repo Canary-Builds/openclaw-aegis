@@ -2,6 +2,24 @@
 
 All notable changes to OpenClaw Aegis are documented here.
 
+## [1.3.0] - 2026-03-06
+
+### Added
+
+- **REST API server** (`aegis serve`) — 18 JSON endpoints for dashboard integration
+  - Health, probes, incidents, recovery, config, alerts, system info
+  - CORS enabled, sensitive data auto-scrubbed
+  - Zero external dependencies (uses `node:http`)
+- **Two-way bot commands** for Telegram, WhatsApp, Slack, Discord
+  - 8 commands: `/health`, `/status`, `/incidents`, `/recovery`, `/backups`, `/alerts`, `/version`, `/help`
+  - Telegram: long polling via `getUpdates` API
+  - WhatsApp: webhook server for Meta Cloud API callbacks
+  - Slack: slash command endpoint with HMAC signature verification
+  - Discord: REST API polling with message commands
+  - Reuses existing alert channel credentials
+- New `[api]` config section: `enabled`, `port`, `host`
+- New `[bot]` config section with per-platform enable flags
+
 ## [1.2.3] - 2026-03-06
 
 ### Fixed

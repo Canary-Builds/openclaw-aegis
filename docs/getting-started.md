@@ -116,8 +116,26 @@ Sending test alert to 1 channel(s)...
 Test alert sent successfully.
 ```
 
+## API & Bot Commands
+
+Start the API server for dashboard integration:
+
+```bash
+aegis serve
+```
+
+Enable two-way bot commands (Telegram, WhatsApp, Slack, Discord):
+
+```bash
+aegis serve --bot
+```
+
+Then message your bot with `/health`, `/status`, `/incidents`, etc.
+
+See [CLI Reference](cli-reference.md) for all endpoints and commands.
+
 ## What's Next
 
-- [Configuration Reference](configuration.md) — tune thresholds, add alert channels
+- [Configuration Reference](configuration.md) — tune thresholds, add alert channels, enable API/bot
 - [Architecture](architecture.md) — understand the probe pipeline and recovery tiers
 - [Alerts](alerts.md) — set up ntfy, Telegram, WhatsApp, Slack, Discord, Email, Pushover, or webhooks

@@ -196,6 +196,27 @@ Events: `INCIDENT_START`, `L1_ATTEMPT`, `L1_SUCCESS`, `L2_ATTEMPT`, `DEAD_MAN_SW
 
 Used for MTTR calculation and post-incident review.
 
+## REST API
+
+The API server (`aegis serve`) exposes all Aegis internals via JSON endpoints on localhost. Designed for dashboard integration — the OpenClaw dashboard can poll `/probes` every 10s and render a live health view.
+
+18 endpoints covering health, probes, incidents, recovery, config, alerts, and system info. All sensitive data (tokens, passwords, webhook URLs) is scrubbed before sending. CORS enabled for frontend access.
+
+## Bot Commands
+
+Four platforms support two-way messaging — users send a command, Aegis replies with real-time data:
+
+| Platform | Method | Notes |
+|----------|--------|-------|
+| **Telegram** | Long polling (`getUpdates`) | Reuses alert channel `botToken`/`chatId` |
+| **WhatsApp** | Webhook server | Receives Meta Cloud API callbacks |
+| **Slack** | Slash commands | HTTP endpoint with HMAC-SHA256 verification |
+| **Discord** | REST polling | Polls channel messages every 2s |
+
+Push-only providers (ntfy, Email, Pushover, Webhook) remain alert-only.
+
+8 commands: `/health`, `/status`, `/incidents`, `/recovery`, `/backups`, `/alerts`, `/version`, `/help`
+
 ## Platform Adapters
 
 ### systemd (Linux)

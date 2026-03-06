@@ -88,6 +88,14 @@ openclaw-aegis/
         email.ts            # SMTP email (STARTTLS/TLS)
         pushover.ts         # Pushover push notifications
         webhook.ts          # Generic webhook with HMAC signing
+    api/
+      server.ts             # REST API server (18 endpoints)
+    bot/
+      commands.ts           # Shared command handler (8 commands)
+      telegram.ts           # Telegram long polling listener
+      whatsapp.ts           # WhatsApp webhook listener
+      slack.ts              # Slack slash command listener
+      discord.ts            # Discord REST polling listener
     daemon/
       index.ts              # Main daemon class
     types/

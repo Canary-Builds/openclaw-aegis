@@ -221,6 +221,69 @@ Incident logs are stored at `~/.openclaw/aegis/incidents/` as append-only JSONL 
 
 ---
 
+## `aegis serve`
+
+Starts the Aegis REST API server and optional bot listeners for dashboard integration and two-way messaging.
+
+```bash
+aegis serve [--config <path>] [--port <port>] [--host <host>] [--bot]
+```
+
+| Option | Description |
+|--------|-------------|
+| `-c, --config <path>` | Config file path (default: `~/.openclaw/aegis/config.toml`) |
+| `-p, --port <port>` | API port (overrides config, default: `3001`) |
+| `--host <host>` | API host (overrides config, default: `127.0.0.1`) |
+| `--bot` | Enable bot listeners (overrides config) |
+
+### API Endpoints
+
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | `/health` | Health band, score, summary |
+| GET | `/probes` | All 10 probe results with latency |
+| GET | `/probes/:name` | Single probe detail |
+| GET | `/incidents` | Incident list with status |
+| GET | `/incidents/stats` | MTTR, totals, breakdowns |
+| GET | `/incidents/:id` | Full event timeline |
+| GET | `/recovery/status` | Recovery state (idle/active) |
+| GET | `/recovery/circuit-breaker` | Tripped status, failed cycles |
+| GET | `/recovery/anti-flap` | Crash window config |
+| GET | `/config` | Current config (secrets scrubbed) |
+| GET | `/config/backups` | Chronological + known-good backups |
+| GET | `/config/guardian` | Dead man's switch state |
+| GET | `/alerts/channels` | Alert channels (secrets scrubbed) |
+| POST | `/alerts/test` | Send test alert |
+| GET | `/alerts/history` | Recent alert deliveries |
+| GET | `/version` | Aegis version |
+| GET | `/uptime` | Server uptime |
+| GET | `/platform` | OS, arch, Node version |
+
+### Bot Commands
+
+When bot listeners are enabled (`--bot` or `[bot] enabled = true`), users can send commands to Telegram, WhatsApp, Slack, or Discord:
+
+| Command | Description |
+|---------|-------------|
+| `/health` | Health summary |
+| `/status` | Per-probe details |
+| `/incidents` | Recent incidents |
+| `/recovery` | Recovery & circuit breaker state |
+| `/backups` | Backup list |
+| `/alerts` | Alert channel status |
+| `/version` | Version, uptime, platform |
+| `/help` | List available commands |
+
+**Example output** (Telegram):
+
+```
+/health
+✅ Health: HEALTHY (score: 10)
+Probes: 10/10 passed
+```
+
+---
+
 ## Exit Codes
 
 | Code | Meaning |

@@ -21,6 +21,7 @@ Aegis prevents this:
 2. **Diagnoses** the root cause using 6 failure pattern matchers
 3. **Fixes** automatically — restores known-good config, clears stale PIDs, runs safe `doctor --fix`
 4. **Alerts** you through channels that bypass the gateway entirely (ntfy, Telegram, WhatsApp, Slack, Discord, Email, Pushover, webhook)
+5. **Responds** to bot commands — message `/health` on Telegram, WhatsApp, Slack, or Discord and get real-time status
 
 **Total downtime: ~15 seconds instead of hours.**
 
@@ -59,6 +60,7 @@ Probes: 10 passed, 0 failed
 | `aegis test-alert` | Send a test notification to all configured channels |
 | `aegis incidents` | Browse past incident logs |
 | `aegis incidents <id>` | Show full timeline for a specific incident |
+| `aegis serve` | Start REST API server + bot listeners |
 
 ---
 
