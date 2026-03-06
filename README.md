@@ -5,7 +5,7 @@
 <h1 align="center">OpenClaw Aegis</h1>
 
 <p align="center">
-  <strong>The self-healing shield for your OpenClaw Gateway. When your gateway falls, Aegis brings it back.</strong>
+  <strong>Your gateway's self-healing armor. Shields. Heals. Holds.</strong>
 </p>
 
 <p align="center">
