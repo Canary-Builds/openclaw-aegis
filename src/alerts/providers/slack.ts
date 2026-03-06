@@ -15,7 +15,12 @@ export class SlackProvider implements AlertProvider {
 
   async send(alert: AlertPayload): Promise<AlertResult> {
     const start = Date.now();
-    const icon = alert.severity === "critical" ? ":rotating_light:" : alert.severity === "warning" ? ":warning:" : ":information_source:";
+    const icon =
+      alert.severity === "critical"
+        ? ":rotating_light:"
+        : alert.severity === "warning"
+          ? ":warning:"
+          : ":information_source:";
 
     const payload: Record<string, unknown> = {
       text: `${icon} *${alert.title}*\n\n${alert.body}`,

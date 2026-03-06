@@ -113,7 +113,11 @@ export class AegisDaemon {
       switch (channel.type) {
         case "ntfy":
           this.alertDispatcher.addProvider(
-            new NtfyProvider({ url: channel.url, topic: channel.topic, priority: channel.priority }),
+            new NtfyProvider({
+              url: channel.url,
+              topic: channel.topic,
+              priority: channel.priority,
+            }),
           );
           break;
         case "webhook":

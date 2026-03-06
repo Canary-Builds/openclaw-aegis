@@ -49,7 +49,11 @@ export class BackupManager {
     while (meta.chronological.length > this.maxChronological) {
       const removed = meta.chronological.shift();
       if (removed) {
-        try { fs.unlinkSync(removed.path); } catch { /* already gone */ }
+        try {
+          fs.unlinkSync(removed.path);
+        } catch {
+          /* already gone */
+        }
       }
     }
 
@@ -99,7 +103,11 @@ export class BackupManager {
     while (meta.knownGood.length > this.maxKnownGood) {
       const removed = meta.knownGood.shift();
       if (removed) {
-        try { fs.unlinkSync(removed.path); } catch { /* already gone */ }
+        try {
+          fs.unlinkSync(removed.path);
+        } catch {
+          /* already gone */
+        }
       }
     }
 

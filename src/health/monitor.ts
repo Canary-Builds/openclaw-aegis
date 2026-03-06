@@ -77,7 +77,8 @@ export class HealthMonitor extends EventEmitter {
       withTimeout(() => configProbe(target, this.config.gateway.configPath), "config"),
       withTimeout(() => tunProbe(target), "tun"),
       withTimeout(
-        () => memoryProbe(target, this.config.gateway.pidFile, this.config.health.memoryThresholdMb),
+        () =>
+          memoryProbe(target, this.config.gateway.pidFile, this.config.health.memoryThresholdMb),
         "memory",
       ),
       withTimeout(
@@ -89,17 +90,22 @@ export class HealthMonitor extends EventEmitter {
         "disk",
       ),
       withTimeout(() => logTailProbe(target, this.config.gateway.logPath), "logTail"),
-      withTimeout(
-        () => websocketProbe(target, this.config.gateway.port, timeout),
-        "websocket",
-      ),
+      withTimeout(() => websocketProbe(target, this.config.gateway.port, timeout), "websocket"),
     ]);
 
     const probeResults: HealthProbeResult[] = results.map((r, i) => {
       if (r.status === "fulfilled") return r.value;
       const names = [
-        "process", "port", "http", "config", "tun",
-        "memory", "cpu", "disk", "logTail", "websocket",
+        "process",
+        "port",
+        "http",
+        "config",
+        "tun",
+        "memory",
+        "cpu",
+        "disk",
+        "logTail",
+        "websocket",
       ] as const;
       return {
         name: names[i] ?? "unknown",

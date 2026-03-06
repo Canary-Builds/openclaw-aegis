@@ -9,7 +9,9 @@ import { incidentsCommand } from "./commands/incidents.js";
 
 function getVersion(): string {
   try {
-    const pkg = JSON.parse(readFileSync(join(__dirname, "..", "..", "package.json"), "utf-8")) as { version: string };
+    const pkg = JSON.parse(readFileSync(join(__dirname, "..", "..", "package.json"), "utf-8")) as {
+      version: string;
+    };
     return pkg.version;
   } catch {
     return "unknown";

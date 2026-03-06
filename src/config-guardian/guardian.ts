@@ -25,7 +25,10 @@ export function preflightValidation(configPath: string): PreflightResult {
   try {
     raw = fs.readFileSync(configPath, "utf-8");
   } catch (err) {
-    return { valid: false, errors: [`Cannot read config: ${err instanceof Error ? err.message : String(err)}`] };
+    return {
+      valid: false,
+      errors: [`Cannot read config: ${err instanceof Error ? err.message : String(err)}`],
+    };
   }
 
   let parsed: Record<string, unknown>;
@@ -89,7 +92,10 @@ export function isCriticalChange(diff: ConfigDiff): boolean {
   return false;
 }
 
-export function startupConfigValidation(config: AegisConfig, backupManager: BackupManager): boolean {
+export function startupConfigValidation(
+  config: AegisConfig,
+  backupManager: BackupManager,
+): boolean {
   const preflight = preflightValidation(config.gateway.configPath);
   if (preflight.valid) return true;
 

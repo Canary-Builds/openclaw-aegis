@@ -13,7 +13,9 @@ export class DiagnosisEngine {
     this.patterns = createPatterns(backupManager);
   }
 
-  async diagnose(context: DiagnosisContext): Promise<{ pattern: FailurePattern; action: RecoveryAction } | null> {
+  async diagnose(
+    context: DiagnosisContext,
+  ): Promise<{ pattern: FailurePattern; action: RecoveryAction } | null> {
     for (const pattern of this.patterns) {
       try {
         const matched = await pattern.detect(context);
@@ -73,9 +75,19 @@ function createPatterns(backupManager: BackupManager): FailurePattern[] {
         const start = Date.now();
         try {
           fs.unlinkSync(ctx.pidFile);
-          return { level: "L2", action: "delete-stale-pid", result: "success", durationMs: Date.now() - start };
+          return {
+            level: "L2",
+            action: "delete-stale-pid",
+            result: "success",
+            durationMs: Date.now() - start,
+          };
         } catch {
-          return { level: "L2", action: "delete-stale-pid", result: "failure", durationMs: Date.now() - start };
+          return {
+            level: "L2",
+            action: "delete-stale-pid",
+            result: "failure",
+            durationMs: Date.now() - start,
+          };
         }
       },
     },
@@ -109,7 +121,12 @@ function createPatterns(backupManager: BackupManager): FailurePattern[] {
             durationMs: Date.now() - start,
           };
         } catch {
-          return { level: "L2", action: "port-conflict-check", result: "failure", durationMs: Date.now() - start };
+          return {
+            level: "L2",
+            action: "port-conflict-check",
+            result: "failure",
+            durationMs: Date.now() - start,
+          };
         }
       },
     },
@@ -129,9 +146,19 @@ function createPatterns(backupManager: BackupManager): FailurePattern[] {
         const start = Date.now();
         try {
           fs.chmodSync(ctx.configPath, 0o600);
-          return { level: "L2", action: "fix-permissions", result: "success", durationMs: Date.now() - start };
+          return {
+            level: "L2",
+            action: "fix-permissions",
+            result: "success",
+            durationMs: Date.now() - start,
+          };
         } catch {
-          return { level: "L2", action: "fix-permissions", result: "failure", durationMs: Date.now() - start };
+          return {
+            level: "L2",
+            action: "fix-permissions",
+            result: "failure",
+            durationMs: Date.now() - start,
+          };
         }
       },
     },
@@ -164,14 +191,21 @@ function createPatterns(backupManager: BackupManager): FailurePattern[] {
       name: "oom-kill",
       async detect(_ctx: DiagnosisContext): Promise<boolean> {
         try {
-          const { stdout } = await execFileAsync("dmesg", ["--time-format", "reltime"], { timeout: 5000 });
+          const { stdout } = await execFileAsync("dmesg", ["--time-format", "reltime"], {
+            timeout: 5000,
+          });
           return /oom_kill_process|Out of memory/.test(stdout);
         } catch {
           return false;
         }
       },
       async fix(): Promise<RecoveryAction> {
-        return { level: "L4", action: "oom-kill-detected-escalate", result: "skipped", durationMs: 0 };
+        return {
+          level: "L4",
+          action: "oom-kill-detected-escalate",
+          result: "skipped",
+          durationMs: 0,
+        };
       },
     },
   ];

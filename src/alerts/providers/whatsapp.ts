@@ -21,14 +21,19 @@ export class WhatsAppProvider implements AlertProvider {
   async send(alert: AlertPayload): Promise<AlertResult> {
     const start = Date.now();
     const url = `https://graph.facebook.com/v21.0/${this.config.phoneNumberId}/messages`;
-    const icon = alert.severity === "critical" ? "\u{1F6A8}" : alert.severity === "warning" ? "\u{26A0}\u{FE0F}" : "\u{2139}\u{FE0F}";
+    const icon =
+      alert.severity === "critical"
+        ? "\u{1F6A8}"
+        : alert.severity === "warning"
+          ? "\u{26A0}\u{FE0F}"
+          : "\u{2139}\u{FE0F}";
     const text = `${icon} *${alert.title}*\n\n${alert.body}`;
 
     try {
       const response = await fetch(url, {
         method: "POST",
         headers: {
-          "Authorization": `Bearer ${this.config.accessToken}`,
+          Authorization: `Bearer ${this.config.accessToken}`,
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
@@ -39,7 +44,10 @@ export class WhatsAppProvider implements AlertProvider {
         }),
       });
 
-      const data = await response.json() as { messages?: { id: string }[]; error?: { message: string } };
+      const data = (await response.json()) as {
+        messages?: { id: string }[];
+        error?: { message: string };
+      };
       const success = response.ok && !!data.messages?.length;
 
       return {

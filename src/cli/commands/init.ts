@@ -1,7 +1,12 @@
 import { Command } from "commander";
 import * as fs from "node:fs";
 import * as readline from "node:readline";
-import { ensureConfigDir, DEFAULT_CONFIG_PATH, expandHome, loadConfig } from "../../config/loader.js";
+import {
+  ensureConfigDir,
+  DEFAULT_CONFIG_PATH,
+  expandHome,
+  loadConfig,
+} from "../../config/loader.js";
 import { HealthMonitor } from "../../health/monitor.js";
 
 function ask(rl: readline.Interface, question: string, defaultValue?: string): Promise<string> {
@@ -21,7 +26,9 @@ function detectPort(): number {
       const gateway = raw?.gateway as Record<string, unknown> | undefined;
       if (gateway?.port && typeof gateway.port === "number") return gateway.port;
     }
-  } catch { /* ignore */ }
+  } catch {
+    /* ignore */
+  }
   return 3000;
 }
 
@@ -123,11 +130,17 @@ export const initCommand = new Command("init")
 
       // Alert channels
       console.log("\n  Alert Channels (out-of-band — never through the gateway)\n");
-      console.log("  Supported: ntfy, telegram, whatsapp, slack, discord, email, pushover, webhook\n");
+      console.log(
+        "  Supported: ntfy, telegram, whatsapp, slack, discord, email, pushover, webhook\n",
+      );
 
       let addMore = true;
       while (addMore) {
-        const channelType = await ask(rl, "Add alert channel? (ntfy/telegram/whatsapp/slack/discord/email/pushover/webhook/skip)", "skip");
+        const channelType = await ask(
+          rl,
+          "Add alert channel? (ntfy/telegram/whatsapp/slack/discord/email/pushover/webhook/skip)",
+          "skip",
+        );
 
         if (channelType === "skip" || channelType === "") {
           addMore = false;
@@ -156,7 +169,10 @@ export const initCommand = new Command("init")
           case "whatsapp": {
             const phoneNumberId = await ask(rl, "  WhatsApp Business phone number ID");
             const accessToken = await ask(rl, "  WhatsApp Cloud API access token");
-            const recipientNumber = await ask(rl, "  Recipient phone number (with country code, e.g. 61412345678)");
+            const recipientNumber = await ask(
+              rl,
+              "  Recipient phone number (with country code, e.g. 61412345678)",
+            );
             if (phoneNumberId && accessToken && recipientNumber) {
               channels.push({ type: "whatsapp", phoneNumberId, accessToken, recipientNumber });
               console.log("  Added WhatsApp channel\n");
@@ -169,7 +185,10 @@ export const initCommand = new Command("init")
             const webhookUrl = await ask(rl, "  Slack Incoming Webhook URL");
             if (webhookUrl) {
               const channel = await ask(rl, "  Slack channel override (optional, e.g. #alerts)");
-              const ch: { type: string; webhookUrl: string; channel?: string } = { type: "slack", webhookUrl };
+              const ch: { type: string; webhookUrl: string; channel?: string } = {
+                type: "slack",
+                webhookUrl,
+              };
               if (channel) ch.channel = channel;
               channels.push(ch);
               console.log("  Added Slack channel\n");
@@ -182,7 +201,10 @@ export const initCommand = new Command("init")
             const webhookUrl = await ask(rl, "  Discord Webhook URL");
             if (webhookUrl) {
               const username = await ask(rl, "  Bot display name (optional)", "Aegis");
-              const ch: { type: string; webhookUrl: string; username?: string } = { type: "discord", webhookUrl };
+              const ch: { type: string; webhookUrl: string; username?: string } = {
+                type: "discord",
+                webhookUrl,
+              };
               if (username && username !== "Aegis") ch.username = username;
               channels.push(ch);
               console.log("  Added Discord channel\n");
@@ -200,8 +222,14 @@ export const initCommand = new Command("init")
             const to = await ask(rl, "  To address");
             if (host && username && password && from && to) {
               channels.push({
-                type: "email", host, port: parseInt(portStr, 10) || 587,
-                secure: 0, username, password, from, to,
+                type: "email",
+                host,
+                port: parseInt(portStr, 10) || 587,
+                secure: 0,
+                username,
+                password,
+                from,
+                to,
               });
               console.log("  Added Email channel\n");
             } else {
@@ -214,7 +242,11 @@ export const initCommand = new Command("init")
             const userKey = await ask(rl, "  Pushover user key");
             if (apiToken && userKey) {
               const device = await ask(rl, "  Device name (optional)");
-              const ch: { type: string; apiToken: string; userKey: string; device?: string } = { type: "pushover", apiToken, userKey };
+              const ch: { type: string; apiToken: string; userKey: string; device?: string } = {
+                type: "pushover",
+                apiToken,
+                userKey,
+              };
               if (device) ch.device = device;
               channels.push(ch);
               console.log("  Added Pushover channel\n");
@@ -259,7 +291,9 @@ export const initCommand = new Command("init")
       const passed = score.probeResults.filter((p) => p.healthy).length;
       const failed = score.probeResults.filter((p) => !p.healthy);
 
-      console.log(`  Health: ${score.band.toUpperCase()} (${passed}/${score.probeResults.length} probes passed)`);
+      console.log(
+        `  Health: ${score.band.toUpperCase()} (${passed}/${score.probeResults.length} probes passed)`,
+      );
       if (failed.length > 0) {
         for (const probe of failed) {
           console.log(`    - ${probe.name}: ${probe.message ?? "failed"}`);
@@ -285,6 +319,8 @@ export const initCommand = new Command("init")
     const monitor = new HealthMonitor(config);
     const score = await monitor.runAllProbes();
     const passed = score.probeResults.filter((p) => p.healthy).length;
-    console.log(`Health: ${score.band.toUpperCase()} (${passed}/${score.probeResults.length} probes passed)`);
+    console.log(
+      `Health: ${score.band.toUpperCase()} (${passed}/${score.probeResults.length} probes passed)`,
+    );
     console.log("\nSetup complete.");
   });

@@ -43,7 +43,11 @@ export class IncidentLogger {
       checksum: "",
     };
 
-    const payload = JSON.stringify({ timestamp: event.timestamp, type: event.type, data: event.data });
+    const payload = JSON.stringify({
+      timestamp: event.timestamp,
+      type: event.type,
+      data: event.data,
+    });
     event.checksum = crypto.createHash("sha256").update(payload).digest("hex");
 
     const logFile = path.join(incidentDir, "events.jsonl");

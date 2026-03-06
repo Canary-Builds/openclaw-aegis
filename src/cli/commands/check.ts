@@ -17,7 +17,9 @@ export const checkCommand = new Command("check")
     } else {
       const failed = score.probeResults.filter((p) => !p.healthy);
       process.stdout.write(`Health: ${score.band.toUpperCase()} (score: ${score.total})\n`);
-      process.stdout.write(`Probes: ${score.probeResults.length - failed.length} passed, ${failed.length} failed\n`);
+      process.stdout.write(
+        `Probes: ${score.probeResults.length - failed.length} passed, ${failed.length} failed\n`,
+      );
 
       if (failed.length > 0) {
         process.stdout.write("\nFailed probes:\n");

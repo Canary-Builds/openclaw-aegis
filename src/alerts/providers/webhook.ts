@@ -20,10 +20,7 @@ export class WebhookProvider implements AlertProvider {
     const headers: Record<string, string> = { "Content-Type": "application/json" };
 
     if (this.config.secret) {
-      const signature = crypto
-        .createHmac("sha256", this.config.secret)
-        .update(body)
-        .digest("hex");
+      const signature = crypto.createHmac("sha256", this.config.secret).update(body).digest("hex");
       headers["X-Aegis-Signature"] = `sha256=${signature}`;
     }
 

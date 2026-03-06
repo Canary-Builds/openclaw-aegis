@@ -26,7 +26,12 @@ export async function safeDoctorFix(configPath: string): Promise<DoctorResult> {
   try {
     beforeConfig = JSON.parse(beforeContent) as Record<string, unknown>;
   } catch {
-    return { success: false, diff: null, rejected: false, output: "Config is not valid JSON before doctor" };
+    return {
+      success: false,
+      diff: null,
+      rejected: false,
+      output: "Config is not valid JSON before doctor",
+    };
   }
 
   const tmpBackup = `${configPath}.aegis-doctor-backup.${process.pid}`;
@@ -37,7 +42,11 @@ export async function safeDoctorFix(configPath: string): Promise<DoctorResult> {
     const result = await execFileAsync("openclaw", ["doctor", "--fix"], { timeout: 30000 });
     output = result.stdout + result.stderr;
   } catch (err) {
-    try { fs.unlinkSync(tmpBackup); } catch { /* cleanup */ }
+    try {
+      fs.unlinkSync(tmpBackup);
+    } catch {
+      /* cleanup */
+    }
     const msg = err instanceof Error ? err.message : String(err);
     return { success: false, diff: null, rejected: false, output: `doctor --fix failed: ${msg}` };
   }
@@ -46,7 +55,11 @@ export async function safeDoctorFix(configPath: string): Promise<DoctorResult> {
   const afterChecksum = sha256(afterContent);
 
   if (afterChecksum === beforeChecksum) {
-    try { fs.unlinkSync(tmpBackup); } catch { /* cleanup */ }
+    try {
+      fs.unlinkSync(tmpBackup);
+    } catch {
+      /* cleanup */
+    }
     return { success: true, diff: null, rejected: false, output };
   }
 
@@ -55,8 +68,18 @@ export async function safeDoctorFix(configPath: string): Promise<DoctorResult> {
     afterConfig = JSON.parse(afterContent) as Record<string, unknown>;
   } catch {
     atomicWrite(configPath, beforeContent);
-    try { fs.unlinkSync(tmpBackup); } catch { /* cleanup */ }
-    return { success: false, diff: null, rejected: true, rejectedReason: "doctor produced invalid JSON", output };
+    try {
+      fs.unlinkSync(tmpBackup);
+    } catch {
+      /* cleanup */
+    }
+    return {
+      success: false,
+      diff: null,
+      rejected: true,
+      rejectedReason: "doctor produced invalid JSON",
+      output,
+    };
   }
 
   const diff = diffConfigs(beforeConfig, afterConfig);
@@ -65,7 +88,11 @@ export async function safeDoctorFix(configPath: string): Promise<DoctorResult> {
 
   if (protectedRemovals.length > 0) {
     atomicWrite(configPath, beforeContent);
-    try { fs.unlinkSync(tmpBackup); } catch { /* cleanup */ }
+    try {
+      fs.unlinkSync(tmpBackup);
+    } catch {
+      /* cleanup */
+    }
     return {
       success: false,
       diff,
@@ -75,6 +102,10 @@ export async function safeDoctorFix(configPath: string): Promise<DoctorResult> {
     };
   }
 
-  try { fs.unlinkSync(tmpBackup); } catch { /* cleanup */ }
+  try {
+    fs.unlinkSync(tmpBackup);
+  } catch {
+    /* cleanup */
+  }
   return { success: true, diff, rejected: false, output };
 }
