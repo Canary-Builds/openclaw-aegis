@@ -2,6 +2,14 @@
 
 All notable changes to OpenClaw Aegis are documented here.
 
+## [1.2.1] - 2026-03-06
+
+### Fixed
+
+- macOS: memory probe now uses `ps -o rss=` instead of `/proc` (which doesn't exist on macOS)
+- macOS: CPU probe now uses `ps -o %cpu=` instead of `/proc`
+- Config probe accepts `port` at top level or nested under `gateway` (fixes false "missing gateway.port" error)
+
 ## [1.2.0] - 2026-03-06
 
 ### Added
