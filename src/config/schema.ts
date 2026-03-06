@@ -127,6 +127,14 @@ export const aegisConfigSchema = z.object({
     })
     .default({}),
 
+  api: z
+    .object({
+      enabled: z.boolean().default(false),
+      port: z.number().int().min(1).max(65535).default(3001),
+      host: z.string().default("127.0.0.1"),
+    })
+    .default({}),
+
   platform: z
     .object({
       type: z.enum(["systemd", "launchd"]).default("systemd"),
