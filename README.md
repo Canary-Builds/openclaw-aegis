@@ -3,10 +3,6 @@
 </p>
 
 <p align="center">
-  <em>Your gateway's self-healing armor. Shields. Heals. Holds.</em>
-</p>
-
-<p align="center">
   <a href="https://www.npmjs.com/package/openclaw-aegis"><img src="https://img.shields.io/npm/v/openclaw-aegis" alt="npm" /></a>
   <a href="https://github.com/Canary-Builds/openclaw-aegis/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/Canary-Builds/openclaw-aegis/ci.yml?label=CI" alt="CI" /></a>
   <a href="https://nodejs.org"><img src="https://img.shields.io/badge/node-%3E%3D18-brightgreen" alt="Node.js" /></a>
