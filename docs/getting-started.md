@@ -24,6 +24,27 @@ npm run build
 npm link
 ```
 
+## Updating
+
+```bash
+npm update -g openclaw-aegis
+```
+
+To check your current version:
+
+```bash
+aegis --version
+```
+
+If you installed from source:
+
+```bash
+cd openclaw-aegis
+git pull
+npm install
+npm run build
+```
+
 ## Setup
 
 ### Auto mode (zero prompts)
