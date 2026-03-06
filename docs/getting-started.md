@@ -53,7 +53,7 @@ npm run build
 aegis init --auto
 ```
 
-This detects your gateway port from `~/.openclaw/openclaw.json`, sets sensible defaults, and writes the config to `~/.openclaw/aegis/config.toml`.
+This auto-detects your gateway port from `~/.openclaw/openclaw.json` (or falls back to 3000), detects your platform (systemd on Linux, launchd on macOS), sets sensible defaults, and writes the config to `~/.openclaw/aegis/config.toml`.
 
 ### Interactive mode
 

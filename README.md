@@ -86,7 +86,7 @@ OpenClaw Gateway                  Aegis Sidecar
 │    openclaw.json    │          │  Dead Man's Switch           │
 │    logs/            │          │  Recovery Orchestrator        │
 │                     │          │    L1: Restart               │
-│  systemd service    │◄─────────│    L2: Targeted Repair       │
+│  systemd/launchd    │◄─────────│    L2: Targeted Repair       │
 │                     │          │    L4: Human Alert           │
 └─────────────────────┘          │  Alert Dispatcher            │
                                  │  (8 alert providers)         │

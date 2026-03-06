@@ -24,7 +24,7 @@ Writes config to `~/.openclaw/aegis/config.toml` and runs a health check to veri
 ```bash
 $ aegis init --auto
 Auto-detecting configuration...
-  Gateway port: 18789
+  Gateway port: 3000
   PID source: openclaw-gateway.service (systemd)    # or ai.openclaw.gateway (launchd) on macOS
   Memory threshold: 768MB
 Config written to ~/.openclaw/aegis/config.toml

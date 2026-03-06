@@ -55,7 +55,7 @@ Every 10s:
 | **process** | 2 | PID alive via systemd/launchd or `kill -0` | Crash, OOM kill |
 | **port** | 2 | TCP connect to gateway port | Zombie process, port conflict |
 | **http** | 2 | `openclaw gateway health` exit code | Internal gateway error |
-| **config** | 2 | Valid JSON, required keys, no poison keys | Config corruption |
+| **config** | 2 | Valid JSON, no poison keys | Config corruption |
 | **websocket** | 1 | WS handshake to gateway | Protocol/auth failure |
 | **tun** | 1 | Default route exists, TUN if configured | Network issues |
 | **memory** | 1 | RSS below threshold (via `/proc` on Linux, `ps` on macOS) | Memory leak, approaching OOM |
@@ -105,7 +105,6 @@ The `ConfigChangeDetector` watches `openclaw.json` for rapid writes. If more tha
 
 Before any restart, the guardian checks:
 - Config file exists and is valid JSON
-- Required keys are present (`gateway.port`)
 - No poison keys (`autoAck`, `autoAckMessage`)
 
 If pre-flight fails, **L1 restart is blocked** — no crash loop.

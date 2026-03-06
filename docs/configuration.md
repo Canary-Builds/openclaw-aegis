@@ -8,7 +8,7 @@ Aegis is configured via TOML at `~/.openclaw/aegis/config.toml`. Run `aegis init
 [gateway]
 configPath = "~/.openclaw/openclaw.json"
 pidFile = "openclaw-gateway.service"          # systemd unit, launchd label, or PID file path
-port = 18789
+port = 3000                                    # auto-detected from openclaw.json
 logPath = "~/.openclaw/logs/gateway.log"
 healthEndpoint = "/health"
 
@@ -98,7 +98,7 @@ watchdogSec = 30
 |-----|------|---------|-------------|
 | `configPath` | string | `~/.openclaw/openclaw.json` | Path to OpenClaw gateway config |
 | `pidFile` | string | `openclaw-gateway.service` | systemd unit name, launchd label, or PID file path |
-| `port` | integer | `18789` | Gateway port (auto-detected by `aegis init`) |
+| `port` | integer | auto-detected | Gateway port (read from `openclaw.json`, falls back to `3000`) |
 | `logPath` | string | `~/.openclaw/logs/gateway.log` | Gateway log file path |
 | `healthEndpoint` | string | `/health` | HTTP health check endpoint |
 
