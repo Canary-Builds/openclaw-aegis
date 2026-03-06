@@ -72,6 +72,7 @@ Probes: 10 passed, 0 failed
 | [Alerts](docs/alerts.md) | Setting up ntfy, Telegram, WhatsApp, Slack, Discord, Email, Pushover, webhooks |
 | [CLI Reference](docs/cli-reference.md) | Every command with examples and options |
 | [Contributing](docs/contributing.md) | Development setup, testing, PR process |
+| [Releasing](docs/releasing.md) | Version bumps, npm publish, GitHub releases |
 
 ---
 
