@@ -110,7 +110,7 @@ export class EmailProvider implements AlertProvider {
             }
 
             if (step < commands.length) {
-              socket.write(commands[step]!);
+              socket.write(commands[step]);
               step++;
             }
 
@@ -185,7 +185,7 @@ export class EmailProvider implements AlertProvider {
                   `QUIT\r\n`,
                 ];
 
-                socket.write(cmds[0]!);
+                socket.write(cmds[0]);
                 step2 = 1;
 
                 socket.on("data", (d: Buffer) => {
@@ -205,7 +205,7 @@ export class EmailProvider implements AlertProvider {
                     }
 
                     if (step2 < cmds.length) {
-                      socket.write(cmds[step2]!);
+                      socket.write(cmds[step2]);
                       step2++;
                     }
 

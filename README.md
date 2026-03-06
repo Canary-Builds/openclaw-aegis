@@ -57,6 +57,8 @@ Probes: 10 passed, 0 failed
 | `aegis check --json` | JSON output for scripting |
 | `aegis status` | Health dashboard with per-probe details |
 | `aegis test-alert` | Send a test notification to all configured channels |
+| `aegis incidents` | Browse past incident logs |
+| `aegis incidents <id>` | Show full timeline for a specific incident |
 
 ---
 
@@ -70,6 +72,7 @@ Probes: 10 passed, 0 failed
 | [Alerts](docs/alerts.md) | Setting up ntfy, Telegram, WhatsApp, Slack, Discord, Email, Pushover, webhooks |
 | [CLI Reference](docs/cli-reference.md) | Every command with examples and options |
 | [Contributing](docs/contributing.md) | Development setup, testing, PR process |
+| [Releasing](docs/releasing.md) | Version bumps, npm publish, GitHub releases |
 
 ---
 

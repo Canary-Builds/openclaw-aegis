@@ -2,6 +2,27 @@
 
 All notable changes to OpenClaw Aegis are documented here.
 
+## [1.2.0] - 2026-03-06
+
+### Added
+
+- `aegis incidents` — browse past incident logs with timeline view
+- `aegis incidents <id>` — full event timeline for a specific incident
+- `--json` and `--last N` options for scripting
+
+### Fixed
+
+- `aegis --version` now reads from `package.json` instead of hardcoded value
+
+## [1.1.0] - 2026-03-06
+
+### Added
+
+- **Discord** alert provider — rich embeds with color-coded severity
+- **Email (SMTP)** alert provider — STARTTLS and direct TLS support
+- **Pushover** alert provider — push notifications with priority mapping
+- **Slack** alert provider — Incoming Webhooks with mrkdwn formatting
+
 ## [1.0.0] - 2026-03-06
 
 ### Added

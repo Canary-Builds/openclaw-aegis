@@ -1,8 +1,7 @@
 import { Command } from "commander";
 import * as fs from "node:fs";
-import * as path from "node:path";
 import * as readline from "node:readline";
-import { ensureConfigDir, getConfigDir, DEFAULT_CONFIG_PATH, expandHome, loadConfig } from "../../config/loader.js";
+import { ensureConfigDir, DEFAULT_CONFIG_PATH, expandHome, loadConfig } from "../../config/loader.js";
 import { HealthMonitor } from "../../health/monitor.js";
 
 function ask(rl: readline.Interface, question: string, defaultValue?: string): Promise<string> {
@@ -18,8 +17,9 @@ function detectPort(): number {
   try {
     const configPath = expandHome("~/.openclaw/openclaw.json");
     if (fs.existsSync(configPath)) {
-      const raw = JSON.parse(fs.readFileSync(configPath, "utf-8"));
-      if (raw?.gateway?.port) return raw.gateway.port;
+      const raw = JSON.parse(fs.readFileSync(configPath, "utf-8")) as Record<string, unknown>;
+      const gateway = raw?.gateway as Record<string, unknown> | undefined;
+      if (gateway?.port && typeof gateway.port === "number") return gateway.port;
     }
   } catch { /* ignore */ }
   return 3000;
@@ -86,7 +86,6 @@ export const initCommand = new Command("init")
   .description("Interactive setup wizard — configure Aegis for your gateway")
   .option("--auto", "Auto-detect everything, no prompts")
   .action(async (opts: { auto?: boolean }) => {
-    const configDir = getConfigDir();
     const configFile = expandHome(DEFAULT_CONFIG_PATH);
 
     if (fs.existsSync(configFile) && !opts.auto) {
