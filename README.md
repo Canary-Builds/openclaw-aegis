@@ -1,27 +1,40 @@
-# OpenClaw Aegis
+<p align="center">
+  <img src="assets/cover.jpeg" alt="OpenClaw Aegis — Self-Healing Sidecar for OpenClaw Gateway" width="100%" />
+</p>
 
-**Self-healing sidecar for the OpenClaw Gateway.**
+<h1 align="center">OpenClaw Aegis</h1>
 
-Aegis monitors your OpenClaw gateway, detects failures in seconds, fixes them automatically, and alerts you through out-of-band channels that don't depend on the gateway being up.
+<p align="center">
+  <strong>Your gateway's armored guardian. Always watching. Always ready.</strong>
+</p>
 
-[![npm](https://img.shields.io/npm/v/openclaw-aegis)](https://www.npmjs.com/package/openclaw-aegis)
-[![CI](https://github.com/Canary-Builds/openclaw-aegis/actions/workflows/ci.yml/badge.svg)](https://github.com/Canary-Builds/openclaw-aegis/actions/workflows/ci.yml)
-[![Node.js](https://img.shields.io/badge/node-%3E%3D18-brightgreen)](https://nodejs.org)
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+<p align="center">
+  <a href="https://www.npmjs.com/package/openclaw-aegis"><img src="https://img.shields.io/npm/v/openclaw-aegis" alt="npm" /></a>
+  <a href="https://github.com/Canary-Builds/openclaw-aegis/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/Canary-Builds/openclaw-aegis/ci.yml?label=CI" alt="CI" /></a>
+  <a href="https://nodejs.org"><img src="https://img.shields.io/badge/node-%3E%3D18-brightgreen" alt="Node.js" /></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-blue.svg" alt="License: MIT" /></a>
+</p>
 
 ---
 
-## Why Aegis?
+## The Shield Your Gateway Deserves
 
-When your OpenClaw gateway crashes, **everything goes dark** — Telegram, WhatsApp, all channels. If the crash was caused by a bad config, restarting doesn't help. The `.bak` files may contain the same poison. You only find out when you notice messages aren't arriving.
+When your OpenClaw gateway goes down, **everything goes dark** — Telegram, WhatsApp, all channels. Silent. No alerts, no warnings, nothing. If a bad config caused the crash, restarting won't help. The `.bak` files carry the same poison. You only find out hours later when someone asks why messages stopped.
 
-Aegis prevents this:
+**Aegis doesn't let that happen.**
 
-1. **Detects** failures via 10 health probes (process, port, config, memory, CPU, disk, logs, network, WebSocket, HTTP)
-2. **Diagnoses** the root cause using 6 failure pattern matchers
-3. **Fixes** automatically — restores known-good config, clears stale PIDs, runs safe `doctor --fix`
-4. **Alerts** you through channels that bypass the gateway entirely (ntfy, Telegram, WhatsApp, Slack, Discord, Email, Pushover, webhook)
-5. **Responds** to bot commands — message `/health` on Telegram, WhatsApp, Slack, or Discord and get real-time status
+It stands between your gateway and disaster — a tireless sentinel that detects failures in seconds, diagnoses the root cause, repairs what it can, and sounds the alarm through channels that never touch the gateway.
+
+### What It Does
+
+| | |
+|---|---|
+| **Detects** | 10 health probes scan process, port, HTTP, config, WebSocket, TUN, memory, CPU, disk, and logs every 10 seconds |
+| **Diagnoses** | 6 failure pattern matchers identify poison configs, stale PIDs, port conflicts, permission errors, corruption, and OOM kills |
+| **Heals** | L1 restart with backoff, L2 targeted repair, config rollback via dead man's switch — all automatic |
+| **Alerts** | 8 out-of-band providers (ntfy, Telegram, WhatsApp, Slack, Discord, Email, Pushover, webhook) that work even when the gateway is dead |
+| **Responds** | Message `/health` on Telegram, WhatsApp, Slack, or Discord — Aegis replies with real-time status |
+| **Remembers** | Full incident timeline, MTTR tracking, and a 18-endpoint REST API for dashboard integration |
 
 **Total downtime: ~15 seconds instead of hours.**
 
@@ -29,57 +42,45 @@ Aegis prevents this:
 
 ## Quick Start
 
+Three commands. That's it.
+
 ```bash
-# Install
+# Deploy the shield
 npm install -g openclaw-aegis
 
-# Configure (auto-detects your gateway)
+# Auto-detect your gateway — zero questions asked
 aegis init --auto
 
-# Verify
+# Confirm the shield is up
 aegis check
 ```
 
-Output:
 ```
 Health: HEALTHY (score: 10)
 Probes: 10 passed, 0 failed
 ```
 
+Your gateway is now protected.
+
 ---
 
-## Commands
+## Arsenal
 
-| Command | Description |
+| Command | What It Does |
 |---------|-------------|
-| `aegis init` | Interactive setup wizard |
-| `aegis init --auto` | Auto-detect everything, zero prompts |
-| `aegis check` | Run all 10 health probes once |
-| `aegis check --json` | JSON output for scripting |
-| `aegis status` | Health dashboard with per-probe details |
-| `aegis test-alert` | Send a test notification to all configured channels |
-| `aegis incidents` | Browse past incident logs |
-| `aegis incidents <id>` | Show full timeline for a specific incident |
-| `aegis serve` | Start REST API server + bot listeners |
+| `aegis init` | Interactive setup — walks you through everything |
+| `aegis init --auto` | Zero-config setup — detects gateway, sets defaults |
+| `aegis check` | Run all 10 probes, get a health verdict |
+| `aegis check --json` | Machine-readable output for scripts and monitoring |
+| `aegis status` | Live dashboard — every probe, color-coded |
+| `aegis test-alert` | Fire a test alert to all configured channels |
+| `aegis incidents` | Browse past battles — what failed, what was fixed |
+| `aegis incidents <id>` | Full incident timeline with every recovery step |
+| `aegis serve` | Start REST API + bot listeners for dashboard integration |
 
 ---
 
-## Documentation
-
-| Document | Description |
-|----------|-------------|
-| [Getting Started](docs/getting-started.md) | Installation, first setup, verification |
-| [Architecture](docs/architecture.md) | System design, probe pipeline, recovery tiers |
-| [Configuration](docs/configuration.md) | Full TOML reference with every option |
-| [Alerts](docs/alerts.md) | Setting up ntfy, Telegram, WhatsApp, Slack, Discord, Email, Pushover, webhooks |
-| [CLI Reference](docs/cli-reference.md) | Every command with examples and options |
-| [Contributing](docs/contributing.md) | Development setup, testing, PR process |
-| [Releasing](docs/releasing.md) | Version bumps, npm publish, GitHub releases |
-| [Roadmap](docs/roadmap.md) | Feature timeline, planned phases, inspiration sources |
-
----
-
-## How It Works
+## Defense Architecture
 
 ```
 OpenClaw Gateway                  Aegis Sidecar
@@ -88,11 +89,11 @@ OpenClaw Gateway                  Aegis Sidecar
 │  ~/.openclaw/       │◄────────►│  Config Guardian             │
 │    openclaw.json    │          │  Dead Man's Switch           │
 │    logs/            │          │  Recovery Orchestrator        │
-│                     │          │    L1: Restart               │
+│                     │          │    L1: Quick Restart         │
 │  systemd/launchd    │◄─────────│    L2: Targeted Repair       │
 │                     │          │    L4: Human Alert           │
 └─────────────────────┘          │  Alert Dispatcher            │
-                                 │  (8 alert providers)         │
+                                 │  (8 out-of-band providers)   │
                                  └──────────────────────────────┘
                                           │
                                     Out-of-band
@@ -103,13 +104,44 @@ OpenClaw Gateway                  Aegis Sidecar
                                       Your phone
 ```
 
+Alerts bypass the gateway entirely. If the gateway is down, Aegis talks directly to Telegram, Slack, Discord, and the rest. **No single point of failure.**
+
+---
+
+## Recovery Cascade
+
+When Aegis detects a problem, it doesn't just restart and pray:
+
+**L1 — Quick Restart** (5s) — Pre-flight config check first. If config is clean, restart with exponential backoff. If config is poisoned, skip straight to L2.
+
+**L2 — Targeted Repair** (30s-2min) — Diagnose the exact failure pattern and apply the right fix. Restore known-good config, delete stale PID files, fix permissions.
+
+**L4 — Human Alert** (instant) — When auto-recovery fails, Aegis sends a full incident report through every configured channel. You get the health score, what was tried, and why it failed.
+
+Anti-flap protection, circuit breakers, and exponential backoff prevent crash loops. Aegis won't make things worse.
+
+---
+
+## Documentation
+
+| Document | Description |
+|----------|-------------|
+| [Getting Started](docs/getting-started.md) | Installation, first setup, verification |
+| [Architecture](docs/architecture.md) | Probe pipeline, recovery tiers, system design |
+| [Configuration](docs/configuration.md) | Full TOML reference — every knob and dial |
+| [Alerts](docs/alerts.md) | Setup guides for all 8 providers |
+| [CLI Reference](docs/cli-reference.md) | Every command with examples |
+| [Contributing](docs/contributing.md) | Dev setup, testing, PR process |
+| [Releasing](docs/releasing.md) | Version bumps, npm publish, GitHub releases |
+| [Roadmap](docs/roadmap.md) | What's coming — L3 recovery, observability, fleet management |
+
 ---
 
 ## Requirements
 
-- Node.js >= 18
-- OpenClaw Gateway (any version with `openclaw gateway health` support)
-- Linux (systemd) or macOS (launchd)
+- **Node.js** >= 18
+- **OpenClaw Gateway** (any version with `openclaw gateway health`)
+- **Linux** (systemd) or **macOS** (launchd)
 
 ---
 
