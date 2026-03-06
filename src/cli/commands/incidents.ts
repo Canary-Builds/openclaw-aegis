@@ -53,7 +53,7 @@ export const incidentsCommand = new Command("incidents")
   .option("--json", "Output as JSON")
   .option("--last <n>", "Show last N incidents", "10")
   .argument("[incident-id]", "Show details for a specific incident")
-  .action(async (incidentId: string | undefined, opts: { json?: boolean; last: string }) => {
+  .action((incidentId: string | undefined, opts: { json?: boolean; last: string }) => {
     const incidentsDir = expandHome("~/.openclaw/aegis/incidents");
 
     if (!fs.existsSync(incidentsDir)) {
@@ -147,8 +147,8 @@ function eventIcon(type: string): string {
 
 function formatEventDetail(event: IncidentEvent): string {
   const d = event.data;
-  if (d.attempt) return ` (attempt ${d.attempt})`;
-  if (d.pattern) return ` — ${d.pattern}`;
-  if (d.reason) return ` — ${d.reason}`;
+  if (d.attempt) return ` (attempt ${String(d.attempt)})`;
+  if (d.pattern) return ` — ${String(d.pattern)}`;
+  if (d.reason) return ` — ${String(d.reason)}`;
   return "";
 }

@@ -17,8 +17,9 @@ function detectPort(): number {
   try {
     const configPath = expandHome("~/.openclaw/openclaw.json");
     if (fs.existsSync(configPath)) {
-      const raw = JSON.parse(fs.readFileSync(configPath, "utf-8"));
-      if (raw?.gateway?.port) return raw.gateway.port;
+      const raw = JSON.parse(fs.readFileSync(configPath, "utf-8")) as Record<string, unknown>;
+      const gateway = raw?.gateway as Record<string, unknown> | undefined;
+      if (gateway?.port && typeof gateway.port === "number") return gateway.port;
     }
   } catch { /* ignore */ }
   return 3000;
