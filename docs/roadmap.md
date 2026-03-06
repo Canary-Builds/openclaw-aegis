@@ -39,8 +39,11 @@ For the interactive scrollable timeline, open [roadmap.html](roadmap.html) in yo
 - Alert noise reduction (grouping, dedup, smart escalation)
 
 ### Phase 6: Fleet Management (v2.1) — Planned
-- Multi-instance monitoring
-- Remote agent mode (central coordinator)
+- **Fleet mode** — monitor multiple OpenClaw instances, not just local
+- **Remote probes** — health check remote nodes over Tailscale/WireGuard (e.g., Tom's VPS)
+- **Per-client dashboard** — usage, status, incidents per client
+- **Deployment** — push updates to satellite nodes from central
+- **Cost tracking** — tokens used per client per day
 - Config sync with drift detection
 - Rolling restarts across fleet
 
