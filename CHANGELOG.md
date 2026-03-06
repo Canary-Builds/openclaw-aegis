@@ -2,6 +2,13 @@
 
 All notable changes to OpenClaw Aegis are documented here.
 
+## [1.2.3] - 2026-03-06
+
+### Fixed
+
+- Gateway port is now auto-detected from `~/.openclaw/openclaw.json` at runtime instead of using a hardcoded default
+- Shared `detectGatewayPort()` used by both `aegis init` and config loader — no more mismatched ports
+
 ## [1.2.2] - 2026-03-06
 
 ### Fixed

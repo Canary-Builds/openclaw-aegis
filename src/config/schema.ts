@@ -58,7 +58,7 @@ export const aegisConfigSchema = z.object({
     .object({
       configPath: z.string().default("~/.openclaw/openclaw.json"),
       pidFile: z.string().default("openclaw-gateway.service"),
-      port: z.number().int().min(1).max(65535).default(18789),
+      port: z.number().int().min(1).max(65535).default(3000),
       logPath: z.string().default("~/.openclaw/logs/gateway.log"),
       healthEndpoint: z.string().default("/health"),
     })

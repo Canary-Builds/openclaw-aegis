@@ -32,6 +32,7 @@ export function loadConfig(configPath: string): AegisConfig {
 
   if (!fs.existsSync(resolvedPath)) {
     const defaults = aegisConfigSchema.parse({});
+    defaults.gateway.port = detectGatewayPort();
     return resolveConfigPaths(defaults);
   }
 
@@ -39,6 +40,22 @@ export function loadConfig(configPath: string): AegisConfig {
   const parsed: unknown = TOML.parse(raw);
   const validated = aegisConfigSchema.parse(parsed);
   return resolveConfigPaths(validated);
+}
+
+export function detectGatewayPort(): number {
+  try {
+    const configPath = expandHome("~/.openclaw/openclaw.json");
+    if (fs.existsSync(configPath)) {
+      const raw = JSON.parse(fs.readFileSync(configPath, "utf-8")) as Record<string, unknown>;
+      const gateway = raw?.gateway as Record<string, unknown> | undefined;
+      if (gateway?.port && typeof gateway.port === "number") return gateway.port;
+      // Check top-level port
+      if (raw?.port && typeof raw.port === "number") return raw.port;
+    }
+  } catch {
+    /* ignore */
+  }
+  return 3000;
 }
 
 export const DEFAULT_CONFIG_PATH = "~/.openclaw/aegis/config.toml";

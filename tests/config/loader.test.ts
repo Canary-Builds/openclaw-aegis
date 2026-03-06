@@ -33,7 +33,7 @@ describe("loadConfig", () => {
 
   it("returns defaults when config file does not exist", () => {
     const config = loadConfig(path.join(tmpDir, "nonexistent.toml"));
-    expect(config.gateway.port).toBe(18789);
+    expect(config.gateway.port).toBeGreaterThan(0);
     expect(config.monitoring.intervalMs).toBe(10000);
     expect(config.monitoring.configPollIntervalMs).toBe(2000);
     expect(config.recovery.l1MaxAttempts).toBe(3);
@@ -85,7 +85,7 @@ port = 99999
 describe("aegisConfigSchema", () => {
   it("parses empty object with all defaults", () => {
     const config = aegisConfigSchema.parse({});
-    expect(config.gateway.port).toBe(18789);
+    expect(config.gateway.port).toBe(3000);
     expect(config.platform.type).toBe("systemd");
     expect(config.platform.watchdogSec).toBe(30);
   });

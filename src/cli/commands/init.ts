@@ -7,6 +7,7 @@ import {
   DEFAULT_CONFIG_PATH,
   expandHome,
   loadConfig,
+  detectGatewayPort,
 } from "../../config/loader.js";
 import { HealthMonitor } from "../../health/monitor.js";
 
@@ -19,19 +20,6 @@ function ask(rl: readline.Interface, question: string, defaultValue?: string): P
   });
 }
 
-function detectPort(): number {
-  try {
-    const configPath = expandHome("~/.openclaw/openclaw.json");
-    if (fs.existsSync(configPath)) {
-      const raw = JSON.parse(fs.readFileSync(configPath, "utf-8")) as Record<string, unknown>;
-      const gateway = raw?.gateway as Record<string, unknown> | undefined;
-      if (gateway?.port && typeof gateway.port === "number") return gateway.port;
-    }
-  } catch {
-    /* ignore */
-  }
-  return 3000;
-}
 
 function detectPlatform(): { type: "systemd" | "launchd"; pidFile: string } {
   if (os.platform() === "darwin") {
@@ -115,7 +103,7 @@ export const initCommand = new Command("init")
       rl.close();
     }
 
-    const detectedPort = detectPort();
+    const detectedPort = detectGatewayPort();
     const channels: { type: string; [key: string]: string | number }[] = [];
 
     if (opts.auto) {
