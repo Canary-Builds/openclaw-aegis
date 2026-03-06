@@ -40,7 +40,7 @@ For the interactive scrollable timeline, open [roadmap.html](roadmap.html) in yo
 
 ### Phase 6: Fleet Management (v2.1) — Planned
 - **Fleet mode** — monitor multiple OpenClaw instances, not just local
-- **Remote probes** — health check remote nodes over Tailscale/WireGuard (e.g., Tom's VPS)
+- **Remote probes** — health check remote nodes over Tailscale/WireGuard
 - **Per-client dashboard** — usage, status, incidents per client
 - **Deployment** — push updates to satellite nodes from central
 - **Cost tracking** — tokens used per client per day
