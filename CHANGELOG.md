@@ -2,6 +2,12 @@
 
 All notable changes to OpenClaw Aegis are documented here.
 
+## [1.2.2] - 2026-03-06
+
+### Fixed
+
+- Config probe no longer requires `gateway.port` in `openclaw.json` — the key is optional in OpenClaw and Aegis already knows the port from its own config
+
 ## [1.2.1] - 2026-03-06
 
 ### Fixed

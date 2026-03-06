@@ -1,9 +1,7 @@
 import * as fs from "node:fs";
 import type { HealthProbeResult, ProbeTarget } from "../../types/index.js";
 
-const REQUIRED_CONFIG_PATHS: { path: string[][]; label: string }[] = [
-  { path: [["gateway", "port"], ["port"]], label: "gateway.port" },
-];
+const REQUIRED_CONFIG_PATHS: { path: string[][]; label: string }[] = [];
 
 const POISON_KEYS = ["autoAck", "autoAckMessage"];
 

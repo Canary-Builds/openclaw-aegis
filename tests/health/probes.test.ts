@@ -149,13 +149,12 @@ describe("configProbe", () => {
     expect(result.message).toContain("not valid JSON");
   });
 
-  it("detects missing required keys", async () => {
+  it("accepts config without gateway.port (optional key)", async () => {
     const configPath = path.join(tmpDir, "empty.json");
     fs.writeFileSync(configPath, "{}");
 
     const result = await configProbe(LOCAL, configPath);
-    expect(result.healthy).toBe(false);
-    expect(result.message).toContain("Missing required");
+    expect(result.healthy).toBe(true);
   });
 
   it("detects poison keys", async () => {
