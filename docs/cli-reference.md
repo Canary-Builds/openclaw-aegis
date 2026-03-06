@@ -173,6 +173,54 @@ No alert channels configured. Run 'aegis init' to add one.
 
 ---
 
+## `aegis incidents`
+
+Browse past incident logs. Shows a summary of recent incidents with status, duration, and event count.
+
+```bash
+aegis incidents [incident-id] [--json] [--last <n>]
+```
+
+| Option | Description |
+|--------|-------------|
+| `[incident-id]` | Show full timeline for a specific incident |
+| `--json` | Output as JSON |
+| `--last <n>` | Show last N incidents (default: 10) |
+
+**List view:**
+
+```
+3 incident(s) — 2 resolved, 1 unresolved
+
+  + abc123  3/6/2026, 2:15:00 PM  14.2s  (5 events)
+  + def456  3/5/2026, 9:30:00 AM  8.1s   (3 events)
+  - ghi789  3/4/2026, 11:00:00 PM  ongoing  (7 events)
+
+Run 'aegis incidents <id>' for details.
+```
+
+**Detail view** (`aegis incidents abc123`):
+
+```
+Incident: abc123
+Status:   RESOLVED
+Started:  2026-03-06T06:15:00.000Z
+Duration: 14.2s
+
+Timeline:
+
+  14:15:00  > INCIDENT_START
+  14:15:00  ~ L1_ATTEMPT (attempt 1)
+  14:15:05  ~ L1_ATTEMPT (attempt 2)
+  14:15:10  ~ L2_ATTEMPT — stale-pid
+  14:15:11  + L2_SUCCESS — stale-pid
+  14:15:14  + INCIDENT_RESOLVED
+```
+
+Incident logs are stored at `~/.openclaw/aegis/incidents/` as append-only JSONL files.
+
+---
+
 ## Exit Codes
 
 | Code | Meaning |
