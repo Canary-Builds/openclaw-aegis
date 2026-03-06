@@ -43,7 +43,7 @@ aegis init
 Walks you through:
 1. Gateway port (auto-detected)
 2. Memory threshold
-3. Alert channels (ntfy, Telegram, WhatsApp, webhook)
+3. Alert channels (ntfy, Telegram, WhatsApp, Slack, Discord, Email, Pushover, webhook)
 
 ## Verify
 
@@ -99,4 +99,4 @@ Test alert sent successfully.
 
 - [Configuration Reference](configuration.md) — tune thresholds, add alert channels
 - [Architecture](architecture.md) — understand the probe pipeline and recovery tiers
-- [Alerts](alerts.md) — set up Telegram, WhatsApp, ntfy, or webhooks
+- [Alerts](alerts.md) — set up ntfy, Telegram, WhatsApp, Slack, Discord, Email, Pushover, or webhooks

@@ -64,6 +64,27 @@ type = "slack"
 webhookUrl = "https://hooks.slack.com/services/YOUR/WEBHOOK/URL"
 channel = "#alerts"                              # optional channel override
 
+[[alerts.channels]]
+type = "discord"
+webhookUrl = "https://discord.com/api/webhooks/YOUR/WEBHOOK_URL"
+username = "Aegis"                               # optional display name
+
+[[alerts.channels]]
+type = "email"
+host = "smtp.gmail.com"
+port = 587
+secure = false
+username = "you@gmail.com"
+password = "app-password-here"
+from = "aegis@yourdomain.com"
+to = "alerts@yourdomain.com"
+
+[[alerts.channels]]
+type = "pushover"
+apiToken = "your-app-api-token"
+userKey = "your-user-key"
+device = "myphone"                               # optional target device
+
 [platform]
 type = "systemd"                               # "systemd" or "launchd"
 watchdogSec = 30
