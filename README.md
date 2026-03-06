@@ -2,10 +2,8 @@
   <img src="assets/cover.jpg" alt="OpenClaw Aegis — Self-Healing Sidecar for OpenClaw Gateway" width="820" height="450" />
 </p>
 
-<h1 align="center">OpenClaw Aegis</h1>
-
 <p align="center">
-  <strong>Your gateway's self-healing armor. Shields. Heals. Holds.</strong>
+  <em>Your gateway's self-healing armor. Shields. Heals. Holds.</em>
 </p>
 
 <p align="center">
