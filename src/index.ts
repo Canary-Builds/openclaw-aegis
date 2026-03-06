@@ -18,3 +18,8 @@ export * from "./config-guardian/dead-man-switch.js";
 export * from "./diagnosis/engine.js";
 export * from "./diagnosis/doctor-wrapper.js";
 export * from "./api/server.js";
+export * from "./bot/commands.js";
+export * from "./bot/telegram.js";
+export * from "./bot/whatsapp.js";
+export * from "./bot/slack.js";
+export * from "./bot/discord.js";

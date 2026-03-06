@@ -135,6 +135,38 @@ export const aegisConfigSchema = z.object({
     })
     .default({}),
 
+  bot: z
+    .object({
+      enabled: z.boolean().default(false),
+      telegram: z
+        .object({
+          enabled: z.boolean().default(false),
+        })
+        .default({}),
+      whatsapp: z
+        .object({
+          enabled: z.boolean().default(false),
+          webhookPort: z.number().int().min(1).max(65535).default(3002),
+          verifyToken: z.string().default("aegis-verify"),
+        })
+        .default({}),
+      slack: z
+        .object({
+          enabled: z.boolean().default(false),
+          webhookPort: z.number().int().min(1).max(65535).default(3003),
+          signingSecret: z.string().optional(),
+        })
+        .default({}),
+      discord: z
+        .object({
+          enabled: z.boolean().default(false),
+          botToken: z.string().optional(),
+          channelId: z.string().optional(),
+        })
+        .default({}),
+    })
+    .default({}),
+
   platform: z
     .object({
       type: z.enum(["systemd", "launchd"]).default("systemd"),

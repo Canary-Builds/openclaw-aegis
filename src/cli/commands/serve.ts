@@ -8,19 +8,26 @@ import { AlertDispatcher } from "../../alerts/dispatcher.js";
 import { DeadManSwitch } from "../../config-guardian/dead-man-switch.js";
 import { RecoveryOrchestrator } from "../../recovery/orchestrator.js";
 import { DiagnosisEngine } from "../../diagnosis/engine.js";
+import { TelegramBotListener } from "../../bot/telegram.js";
+import { WhatsAppBotListener } from "../../bot/whatsapp.js";
+import { SlackBotListener } from "../../bot/slack.js";
+import { DiscordBotListener } from "../../bot/discord.js";
+import type { BotDeps } from "../../bot/commands.js";
 
 export const serveCommand = new Command("serve")
-  .description("Start the Aegis API server for dashboard integration")
+  .description("Start the Aegis API server and bot listeners")
   .option("-c, --config <path>", "Config file path", DEFAULT_CONFIG_PATH)
   .option("-p, --port <port>", "API port (overrides config)")
   .option("--host <host>", "API host (overrides config)")
-  .action(async (opts: { config: string; port?: string; host?: string }) => {
+  .option("--bot", "Enable bot listeners (overrides config)")
+  .action(async (opts: { config: string; port?: string; host?: string; bot?: boolean }) => {
     const configFile = expandHome(opts.config);
     const config = loadConfig(configFile);
 
     // Apply CLI overrides
     if (opts.port) config.api.port = parseInt(opts.port, 10);
     if (opts.host) config.api.host = opts.host;
+    if (opts.bot) config.bot.enabled = true;
 
     const monitor = new HealthMonitor(config);
     const backupManager = new BackupManager(config);
@@ -47,32 +54,12 @@ export const serveCommand = new Command("serve")
     // Start health monitoring in background
     monitor.start();
 
+    const startedAt = Date.now();
+
     try {
       await api.start();
       const addr = api.getAddress();
       console.log(`Aegis API server listening on http://${addr.host}:${addr.port}`);
-      console.log("");
-      console.log("Endpoints:");
-      console.log("  GET  /health              Health summary");
-      console.log("  GET  /probes              All probe results");
-      console.log("  GET  /probes/:name        Single probe detail");
-      console.log("  GET  /incidents           Incident list");
-      console.log("  GET  /incidents/stats     MTTR and statistics");
-      console.log("  GET  /incidents/:id       Incident timeline");
-      console.log("  GET  /recovery/status     Recovery state");
-      console.log("  GET  /recovery/circuit-breaker");
-      console.log("  GET  /recovery/anti-flap");
-      console.log("  GET  /config              Current config (scrubbed)");
-      console.log("  GET  /config/backups      Backup list");
-      console.log("  GET  /config/guardian      Dead man's switch status");
-      console.log("  GET  /alerts/channels     Alert channels (scrubbed)");
-      console.log("  POST /alerts/test         Send test alert");
-      console.log("  GET  /alerts/history      Recent alert deliveries");
-      console.log("  GET  /version             Aegis version");
-      console.log("  GET  /uptime              Server uptime");
-      console.log("  GET  /platform            OS and runtime info");
-      console.log("");
-      console.log("Press Ctrl+C to stop.");
     } catch (err) {
       console.error(
         `Failed to start API server: ${err instanceof Error ? err.message : String(err)}`,
@@ -80,10 +67,90 @@ export const serveCommand = new Command("serve")
       process.exit(1);
     }
 
+    // Start bot listeners
+    const botStoppers: (() => void | Promise<void>)[] = [];
+
+    if (config.bot.enabled) {
+      const botDeps: BotDeps = {
+        config,
+        monitor,
+        recovery,
+        backup: backupManager,
+        incidents: incidentLogger,
+        alerts: alertDispatcher,
+        deadManSwitch,
+        startedAt,
+      };
+
+      // Telegram bot — reuses alert channel credentials
+      if (config.bot.telegram.enabled) {
+        const tgConfig = config.alerts.channels.find((ch) => ch.type === "telegram");
+        if (tgConfig && tgConfig.type === "telegram") {
+          const tg = new TelegramBotListener(tgConfig.botToken, tgConfig.chatId, botDeps);
+          await tg.start();
+          botStoppers.push(() => tg.stop());
+          console.log("  Bot: Telegram listener active (polling)");
+        } else {
+          console.log("  Bot: Telegram enabled but no Telegram alert channel configured");
+        }
+      }
+
+      // WhatsApp bot — webhook server
+      if (config.bot.whatsapp.enabled) {
+        const waConfig = config.alerts.channels.find((ch) => ch.type === "whatsapp");
+        if (waConfig && waConfig.type === "whatsapp") {
+          const wa = new WhatsAppBotListener(
+            {
+              phoneNumberId: waConfig.phoneNumberId,
+              accessToken: waConfig.accessToken,
+              recipientNumber: waConfig.recipientNumber,
+              verifyToken: config.bot.whatsapp.verifyToken,
+            },
+            botDeps,
+          );
+          await wa.start(config.bot.whatsapp.webhookPort);
+          botStoppers.push(() => wa.stop());
+          console.log(`  Bot: WhatsApp webhook on port ${config.bot.whatsapp.webhookPort}`);
+        } else {
+          console.log("  Bot: WhatsApp enabled but no WhatsApp alert channel configured");
+        }
+      }
+
+      // Slack bot — slash command server
+      if (config.bot.slack.enabled) {
+        const sl = new SlackBotListener({ signingSecret: config.bot.slack.signingSecret }, botDeps);
+        await sl.start(config.bot.slack.webhookPort);
+        botStoppers.push(() => sl.stop());
+        console.log(`  Bot: Slack slash commands on port ${config.bot.slack.webhookPort}`);
+      }
+
+      // Discord bot — polling
+      if (config.bot.discord.enabled) {
+        const dcConfig = config.bot.discord;
+        if (dcConfig.botToken && dcConfig.channelId) {
+          const dc = new DiscordBotListener(
+            { botToken: dcConfig.botToken, channelId: dcConfig.channelId },
+            botDeps,
+          );
+          await dc.start();
+          botStoppers.push(() => dc.stop());
+          console.log("  Bot: Discord listener active (polling)");
+        } else {
+          console.log("  Bot: Discord enabled but botToken/channelId not configured");
+        }
+      }
+    }
+
+    console.log("");
+    console.log("Press Ctrl+C to stop.");
+
     const shutdown = () => {
       console.log("\nShutting down...");
       monitor.stop();
       deadManSwitch.destroy();
+      for (const stop of botStoppers) {
+        void stop();
+      }
       void api.stop().then(() => process.exit(0));
     };
 
