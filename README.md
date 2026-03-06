@@ -111,4 +111,4 @@ OpenClaw Gateway                  Aegis Sidecar
 
 MIT — see [LICENSE](LICENSE).
 
-Built by [Canary Builds](https://github.com/Canary-Builds).
+Built by [Canary Builds](https://canarybuilds.com).
