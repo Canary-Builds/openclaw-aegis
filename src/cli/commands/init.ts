@@ -124,11 +124,11 @@ export const initCommand = new Command("init")
 
       // Alert channels
       console.log("\n  Alert Channels (out-of-band — never through the gateway)\n");
-      console.log("  Supported: ntfy, telegram, whatsapp, webhook\n");
+      console.log("  Supported: ntfy, telegram, whatsapp, slack, webhook\n");
 
       let addMore = true;
       while (addMore) {
-        const channelType = await ask(rl, "Add alert channel? (ntfy/telegram/whatsapp/webhook/skip)", "skip");
+        const channelType = await ask(rl, "Add alert channel? (ntfy/telegram/whatsapp/slack/webhook/skip)", "skip");
 
         if (channelType === "skip" || channelType === "") {
           addMore = false;
@@ -163,6 +163,19 @@ export const initCommand = new Command("init")
               console.log("  Added WhatsApp channel\n");
             } else {
               console.log("  Skipped — all three fields required\n");
+            }
+            break;
+          }
+          case "slack": {
+            const webhookUrl = await ask(rl, "  Slack Incoming Webhook URL");
+            if (webhookUrl) {
+              const channel = await ask(rl, "  Slack channel override (optional, e.g. #alerts)");
+              const ch: { type: string; webhookUrl: string; channel?: string } = { type: "slack", webhookUrl };
+              if (channel) ch.channel = channel;
+              channels.push(ch);
+              console.log("  Added Slack channel\n");
+            } else {
+              console.log("  Skipped — webhook URL required\n");
             }
             break;
           }

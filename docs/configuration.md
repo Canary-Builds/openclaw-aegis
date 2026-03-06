@@ -59,6 +59,11 @@ type = "telegram"
 botToken = "123456789:ABCdefGHIjklMNOpqrsTUV"
 chatId = "987654321"
 
+[[alerts.channels]]
+type = "slack"
+webhookUrl = "https://hooks.slack.com/services/YOUR/WEBHOOK/URL"
+channel = "#alerts"                              # optional channel override
+
 [platform]
 type = "systemd"                               # "systemd" or "launchd"
 watchdogSec = 30

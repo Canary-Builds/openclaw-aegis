@@ -23,6 +23,11 @@ const alertChannelSchema = z.discriminatedUnion("type", [
     accessToken: z.string().min(1),
     recipientNumber: z.string().min(1),
   }),
+  z.object({
+    type: z.literal("slack"),
+    webhookUrl: z.string().url(),
+    channel: z.string().optional(),
+  }),
 ]);
 
 export type AlertChannelConfig = z.infer<typeof alertChannelSchema>;

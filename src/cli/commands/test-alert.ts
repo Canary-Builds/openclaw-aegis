@@ -5,6 +5,7 @@ import { NtfyProvider } from "../../alerts/providers/ntfy.js";
 import { TelegramProvider } from "../../alerts/providers/telegram.js";
 import { WhatsAppProvider } from "../../alerts/providers/whatsapp.js";
 import { WebhookProvider } from "../../alerts/providers/webhook.js";
+import { SlackProvider } from "../../alerts/providers/slack.js";
 import type { AlertPayload } from "../../types/index.js";
 
 export const testAlertCommand = new Command("test-alert")
@@ -33,6 +34,9 @@ export const testAlertCommand = new Command("test-alert")
           break;
         case "webhook":
           dispatcher.addProvider(new WebhookProvider(ch));
+          break;
+        case "slack":
+          dispatcher.addProvider(new SlackProvider(ch));
           break;
       }
     }

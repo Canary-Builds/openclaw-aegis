@@ -109,6 +109,36 @@ recipientNumber = "61412345678"
 
 ---
 
+### Slack
+
+Sends messages via [Slack Incoming Webhooks](https://api.slack.com/messaging/webhooks). Uses Slack's mrkdwn formatting.
+
+```toml
+[[alerts.channels]]
+type = "slack"
+webhookUrl = "https://hooks.slack.com/services/YOUR/WEBHOOK/URL"
+channel = "#alerts"
+```
+
+| Key | Type | Required | Description |
+|-----|------|----------|-------------|
+| `type` | `"slack"` | yes | Provider identifier |
+| `webhookUrl` | string | yes | Slack Incoming Webhook URL |
+| `channel` | string | no | Channel override (e.g., `#alerts`) |
+
+**Setup:**
+
+1. Go to your Slack workspace settings or visit [Slack API: Incoming Webhooks](https://api.slack.com/messaging/webhooks)
+2. Create a new app (or use an existing one) and enable **Incoming Webhooks**
+3. Click **Add New Webhook to Workspace** and select the channel
+4. Copy the webhook URL (format: `https://hooks.slack.com/services/T.../B.../xxx`)
+5. Add the config above
+6. Run `aegis test-alert` to verify
+
+**Channel override:** By default, messages go to the channel selected when creating the webhook. Set `channel` to override (the app must have permission to post there).
+
+---
+
 ### Webhook
 
 Sends a JSON POST to any URL. Optionally signed with HMAC-SHA256 for verification.
@@ -209,11 +239,11 @@ This prevents accidental leakage of config secrets in alert messages.
 
 ## Alert Severity Levels
 
-| Severity | When | ntfy Priority | Telegram Icon |
-|----------|------|---------------|---------------|
-| `critical` | Gateway down, recovery failed | 5 (urgent) | Red siren |
-| `warning` | Degraded, circuit breaker | 4 (high) | Warning sign |
-| `info` | Test alerts, recovery success | 3 (default) | Info icon |
+| Severity | When | ntfy Priority | Telegram/Slack Icon |
+|----------|------|---------------|---------------------|
+| `critical` | Gateway down, recovery failed | 5 (urgent) | Red siren / `:rotating_light:` |
+| `warning` | Degraded, circuit breaker | 4 (high) | Warning sign / `:warning:` |
+| `info` | Test alerts, recovery success | 3 (default) | Info / `:information_source:` |
 
 ## Testing
 
