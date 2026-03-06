@@ -139,3 +139,4 @@ See [CLI Reference](cli-reference.md) for all endpoints and commands.
 - [Configuration Reference](configuration.md) — tune thresholds, add alert channels, enable API/bot
 - [Architecture](architecture.md) — understand the probe pipeline and recovery tiers
 - [Alerts](alerts.md) — set up ntfy, Telegram, WhatsApp, Slack, Discord, Email, Pushover, or webhooks
+- [Roadmap](roadmap.md) — see what's coming next and the full feature timeline

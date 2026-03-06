@@ -139,7 +139,7 @@ import { loadConfig } from "../../src/config/loader.js";
 describe("loadConfig", () => {
   it("should load defaults when no config exists", () => {
     const config = loadConfig("/nonexistent/path.toml");
-    expect(config.gateway.port).toBe(18789);
+    expect(config.gateway.port).toBe(3000);
   });
 });
 ```
