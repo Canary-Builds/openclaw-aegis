@@ -1,6 +1,40 @@
 import * as fs from "node:fs";
+import * as os from "node:os";
+import { execSync } from "node:child_process";
 import type { HealthProbeResult, ProbeTarget } from "../../types/index.js";
 import { resolvePid } from "./resolve-pid.js";
+
+async function getCpuPercentLinux(pid: number, sampleMs: number): Promise<number | null> {
+  const statPath = `/proc/${pid}/stat`;
+  if (!fs.existsSync(statPath)) return null;
+
+  const readCpuTime = (): number => {
+    const stat = fs.readFileSync(statPath, "utf-8");
+    const fields = stat.split(" ");
+    const utime = parseInt(fields[13] ?? "0", 10) || 0;
+    const stime = parseInt(fields[14] ?? "0", 10) || 0;
+    return utime + stime;
+  };
+
+  const cpuTime1 = readCpuTime();
+  await new Promise((r) => setTimeout(r, sampleMs));
+  const cpuTime2 = readCpuTime();
+
+  const clockTicks = 100;
+  const cpuDelta = (cpuTime2 - cpuTime1) / clockTicks;
+  return (cpuDelta / (sampleMs / 1000)) * 100;
+}
+
+function getCpuPercentMac(pid: number): number | null {
+  try {
+    const output = execSync(`ps -o %cpu= -p ${pid}`, { encoding: "utf-8" }).trim();
+    const cpu = parseFloat(output);
+    if (isNaN(cpu)) return null;
+    return cpu;
+  } catch {
+    return null;
+  }
+}
 
 export async function cpuProbe(
   _target: ProbeTarget,
@@ -23,33 +57,22 @@ export async function cpuProbe(
       };
     }
 
-    const statPath = `/proc/${pid}/stat`;
+    let cpuPercent: number | null;
+    if (os.platform() === "darwin") {
+      cpuPercent = getCpuPercentMac(pid);
+    } else {
+      cpuPercent = await getCpuPercentLinux(pid, sampleMs);
+    }
 
-    if (!fs.existsSync(statPath)) {
+    if (cpuPercent === null) {
       return {
         name: "cpu",
         healthy: false,
         score: 0,
-        message: `Process ${pid} not found in /proc`,
+        message: `Could not read CPU usage for process ${pid}`,
         latencyMs: Date.now() - start,
       };
     }
-
-    const readCpuTime = (): number => {
-      const stat = fs.readFileSync(statPath, "utf-8");
-      const fields = stat.split(" ");
-      const utime = parseInt(fields[13] ?? "0", 10) || 0;
-      const stime = parseInt(fields[14] ?? "0", 10) || 0;
-      return utime + stime;
-    };
-
-    const cpuTime1 = readCpuTime();
-    await new Promise((r) => setTimeout(r, sampleMs));
-    const cpuTime2 = readCpuTime();
-
-    const clockTicks = 100; // sysconf(_SC_CLK_TCK) — typically 100 on Linux
-    const cpuDelta = (cpuTime2 - cpuTime1) / clockTicks;
-    const cpuPercent = (cpuDelta / (sampleMs / 1000)) * 100;
     const healthy = cpuPercent < thresholdPercent;
 
     return {

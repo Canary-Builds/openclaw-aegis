@@ -1,8 +1,8 @@
 import * as fs from "node:fs";
 import type { HealthProbeResult, ProbeTarget } from "../../types/index.js";
 
-const REQUIRED_CONFIG_PATHS: { path: string[]; label: string }[] = [
-  { path: ["gateway", "port"], label: "gateway.port" },
+const REQUIRED_CONFIG_PATHS: { path: string[][]; label: string }[] = [
+  { path: [["gateway", "port"], ["port"]], label: "gateway.port" },
 ];
 
 const POISON_KEYS = ["autoAck", "autoAckMessage"];
@@ -39,13 +39,16 @@ export async function configProbe(
       };
     }
 
-    const missingPaths = REQUIRED_CONFIG_PATHS.filter(({ path }) => {
-      let obj: unknown = parsed;
-      for (const key of path) {
-        if (obj === null || typeof obj !== "object" || !(key in obj)) return true;
-        obj = (obj as Record<string, unknown>)[key];
-      }
-      return false;
+    const missingPaths = REQUIRED_CONFIG_PATHS.filter(({ path: alternatives }) => {
+      // Check if ANY of the alternative paths exist
+      return !alternatives.some((keyPath) => {
+        let obj: unknown = parsed;
+        for (const key of keyPath) {
+          if (obj === null || typeof obj !== "object" || !(key in obj)) return false;
+          obj = (obj as Record<string, unknown>)[key];
+        }
+        return true;
+      });
     });
     if (missingPaths.length > 0) {
       return {
