@@ -9,7 +9,7 @@ export interface HealthProbeResult {
 export type ProbeTarget = { type: "local" } | { type: "remote"; host: string; port: number };
 
 export interface RecoveryAction {
-  level: "L1" | "L2" | "L4";
+  level: "L1" | "L2" | "L3" | "L4";
   action: string;
   result: "success" | "failure" | "skipped";
   durationMs: number;

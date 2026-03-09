@@ -2,6 +2,20 @@
 
 All notable changes to OpenClaw Aegis are documented here.
 
+## [1.4.0] - 2026-03-09
+
+### Added
+
+- **L3 Deep Repair** recovery tier between L2 (targeted) and L4 (human escalation)
+  - **Network repair**: DNS cache flush, TUN interface reset, default route detection
+  - **Process resurrection**: Reinstall gateway binary via `npm install -g openclaw` if missing
+  - **Dependency health**: Detect corrupted node_modules, rebuild with `npm install --production`
+  - **Safe mode boot**: Start gateway with minimal config (no plugins, default routes) when normal restart fails
+  - **Disk cleanup**: Truncate oversized logs, delete rotated log files, clear temp directories
+- Recovery cascade now: L1 → L2 → L3 → L4 (was L1 → L2 → L4)
+- New recovery events: `L3_ATTEMPT`, `L3_SUCCESS`, `L3_FAILURE`, `L3_NO_MATCH`
+- New config options: `l3MaxAttempts`, `l3CooldownMs`, `l3SafeModeArgs`
+
 ## [1.3.0] - 2026-03-06
 
 ### Added

@@ -8,6 +8,7 @@ import { preflightValidation } from "../config-guardian/guardian.js";
 import { DiagnosisEngine } from "../diagnosis/engine.js";
 import { CircuitBreaker } from "./circuit-breaker.js";
 import { BackupManager } from "../backup/manager.js";
+import { createL3Patterns } from "./l3-patterns.js";
 
 const execFileAsync = promisify(execFile);
 
@@ -19,6 +20,10 @@ export type RecoveryEvent =
   | { type: "L2_SUCCESS"; pattern: string }
   | { type: "L2_FAILURE"; pattern: string }
   | { type: "L2_NO_MATCH" }
+  | { type: "L3_ATTEMPT"; pattern: string }
+  | { type: "L3_SUCCESS"; pattern: string }
+  | { type: "L3_FAILURE"; pattern: string }
+  | { type: "L3_NO_MATCH" }
   | { type: "L4_ALERT"; reason: string; actions: RecoveryAction[] }
   | { type: "CIRCUIT_BREAKER_TRIPPED" }
   | { type: "FAST_PATH_L4"; reason: string };
@@ -74,10 +79,20 @@ export class RecoveryOrchestrator extends EventEmitter {
         if (retryL1.success) return actions;
       }
 
-      if (!l2Result.success && l2Result.noMatch) {
+      // L3: Deep repair — network, dependencies, safe mode, disk cleanup
+      const l3Result = await this.attemptL3();
+      actions.push(...l3Result.actions);
+
+      if (l3Result.success) {
+        const retryL1 = await this.attemptL1();
+        actions.push(...retryL1.actions);
+        if (retryL1.success) return actions;
+      }
+
+      if (!l2Result.success && l2Result.noMatch && !l3Result.success) {
         this.emitEvent({
           type: "FAST_PATH_L4",
-          reason: "L1 preflight failed and L2 has no matching pattern",
+          reason: "L1+L2+L3 exhausted — no auto-repair available",
         });
       }
 
@@ -86,9 +101,9 @@ export class RecoveryOrchestrator extends EventEmitter {
         this.emitEvent({ type: "CIRCUIT_BREAKER_TRIPPED" });
       }
 
-      const reason = l2Result.noMatch
+      const reason = !l2Result.success && l2Result.noMatch && !l3Result.success
         ? "No matching failure pattern — cannot auto-repair"
-        : "Recovery exhausted — L1+L2 failed";
+        : "Recovery exhausted — L1+L2+L3 failed";
       this.emitEvent({ type: "L4_ALERT", reason, actions });
 
       return actions;
@@ -187,6 +202,59 @@ export class RecoveryOrchestrator extends EventEmitter {
     }
 
     return { success: false, actions, noMatch: false };
+  }
+
+  private async attemptL3(): Promise<{
+    success: boolean;
+    actions: RecoveryAction[];
+  }> {
+    const actions: RecoveryAction[] = [];
+    const l3Patterns = createL3Patterns();
+
+    const context: DiagnosisContext = {
+      configPath: this.config.gateway.configPath,
+      pidFile: this.config.gateway.pidFile,
+      gatewayPort: this.config.gateway.port,
+      logPath: this.config.gateway.logPath,
+      knownGoodPath: this.backupManager.getLatestKnownGood()?.path,
+      currentConfig: this.readCurrentConfig(),
+    };
+
+    for (let attempt = 0; attempt < this.config.recovery.l3MaxAttempts; attempt++) {
+      let matched = false;
+
+      for (const pattern of l3Patterns) {
+        try {
+          const detected = await pattern.detect(context);
+          if (!detected) continue;
+
+          matched = true;
+          this.emitEvent({ type: "L3_ATTEMPT", pattern: pattern.name });
+          const action = await pattern.fix(context);
+          actions.push(action);
+
+          if (action.result === "success") {
+            this.emitEvent({ type: "L3_SUCCESS", pattern: pattern.name });
+            return { success: true, actions };
+          }
+
+          this.emitEvent({ type: "L3_FAILURE", pattern: pattern.name });
+        } catch {
+          // Pattern failed — continue to next
+        }
+      }
+
+      if (!matched) {
+        this.emitEvent({ type: "L3_NO_MATCH" });
+        return { success: false, actions };
+      }
+
+      if (attempt < this.config.recovery.l3MaxAttempts - 1) {
+        await sleep(this.config.recovery.l3CooldownMs);
+      }
+    }
+
+    return { success: false, actions };
   }
 
   private readCurrentConfig(): Record<string, unknown> | null {

@@ -31,6 +31,9 @@ l1BackoffBaseMs = 5000                         # initial backoff between restart
 l1BackoffMultiplier = 3                        # exponential multiplier (5s → 15s → 45s)
 l2MaxAttempts = 2                              # targeted repair attempts
 l2CooldownMs = 60000                           # cooldown between L2 attempts
+l3MaxAttempts = 2                              # deep repair attempts
+l3CooldownMs = 30000                           # cooldown between L3 attempts
+l3SafeModeArgs = ["--no-plugins", "--default-routes"]  # safe mode boot arguments
 circuitBreakerMaxCycles = 3                    # full escalation cycles before tripping
 circuitBreakerWindowMs = 3600000               # circuit breaker window (1 hour)
 
@@ -163,6 +166,9 @@ Platform is auto-detected. `aegis init --auto` sets the correct default for your
 | `l1BackoffMultiplier` | number | `3` | Exponential multiplier |
 | `l2MaxAttempts` | integer | `2` | Max targeted repair attempts |
 | `l2CooldownMs` | integer | `60000` | Cooldown between L2 attempts (ms) |
+| `l3MaxAttempts` | integer | `2` | Max L3 deep repair attempts |
+| `l3CooldownMs` | integer | `30000` | Cooldown between L3 attempts (ms) |
+| `l3SafeModeArgs` | string[] | `["--no-plugins", "--default-routes"]` | Arguments for safe mode boot |
 | `circuitBreakerMaxCycles` | integer | `3` | Escalation cycles before circuit breaker trips |
 | `circuitBreakerWindowMs` | integer | `3600000` | Circuit breaker window (ms) |
 

@@ -25,7 +25,7 @@ It stands between your gateway and disaster — a tireless sentinel that detects
 |---|---|
 | **Detects** | 10 health probes scan process, port, HTTP, config, WebSocket, TUN, memory, CPU, disk, and logs every 10 seconds |
 | **Diagnoses** | 6 failure pattern matchers identify poison configs, stale PIDs, port conflicts, permission errors, corruption, and OOM kills |
-| **Heals** | L1 restart with backoff, L2 targeted repair, config rollback via dead man's switch — all automatic |
+| **Heals** | L1 restart, L2 targeted repair, L3 deep repair (network, dependencies, safe mode, disk), config rollback — all automatic |
 | **Alerts** | 8 out-of-band providers (ntfy, Telegram, WhatsApp, Slack, Discord, Email, Pushover, webhook) that work even when the gateway is dead |
 | **Responds** | Message `/health` on Telegram, WhatsApp, Slack, or Discord — Aegis replies with real-time status |
 | **Remembers** | Full incident timeline, MTTR tracking, and a 18-endpoint REST API for dashboard integration |
@@ -85,6 +85,7 @@ OpenClaw Gateway                  Aegis Sidecar
 │    logs/            │          │  Recovery Orchestrator        │
 │                     │          │    L1: Quick Restart         │
 │  systemd/launchd    │◄─────────│    L2: Targeted Repair       │
+│                     │          │    L3: Deep Repair           │
 │                     │          │    L4: Human Alert           │
 └─────────────────────┘          │  Alert Dispatcher            │
                                  │  (8 out-of-band providers)   │
@@ -109,6 +110,8 @@ When Aegis detects a problem, it doesn't just restart and pray:
 **L1 — Quick Restart** (5s) — Pre-flight config check first. If config is clean, restart with exponential backoff. If config is poisoned, skip straight to L2.
 
 **L2 — Targeted Repair** (30s-2min) — Diagnose the exact failure pattern and apply the right fix. Restore known-good config, delete stale PID files, fix permissions.
+
+**L3 — Deep Repair** (30s-2min) — Riskier fixes when L2 isn't enough. Network repair (DNS flush, TUN reset), process resurrection (reinstall binary), dependency rebuild, safe mode boot, and disk cleanup.
 
 **L4 — Human Alert** (instant) — When auto-recovery fails, Aegis sends a full incident report through every configured channel. You get the health score, what was tried, and why it failed.
 

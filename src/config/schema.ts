@@ -90,6 +90,9 @@ export const aegisConfigSchema = z.object({
       l1BackoffMultiplier: z.number().min(1).default(3),
       l2MaxAttempts: z.number().int().min(1).default(2),
       l2CooldownMs: z.number().int().min(1000).default(60000),
+      l3MaxAttempts: z.number().int().min(1).default(2),
+      l3CooldownMs: z.number().int().min(1000).default(30000),
+      l3SafeModeArgs: z.array(z.string()).default(["--no-plugins", "--default-routes"]),
       circuitBreakerMaxCycles: z.number().int().min(1).default(3),
       circuitBreakerWindowMs: z.number().int().min(60000).default(3600000),
       antiFlap: z

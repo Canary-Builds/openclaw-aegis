@@ -368,31 +368,35 @@
     <!-- PHASE 3: L3 Recovery (CURRENT) -->
     <div class="phase">
       <div class="phase-header">
-        <div class="phase-dot current"></div>
+        <div class="phase-dot done"></div>
         <div class="phase-label">Phase 3</div>
         <div class="phase-title">L3 Recovery</div>
-        <div class="phase-version">v1.4 &middot; In Progress</div>
+        <div class="phase-version">v1.4 &middot; Shipped</div>
       </div>
       <div class="cards">
         <div class="card">
-          <div class="card-title">Deep Repair Tier <span class="tag tag-recovery">RECOVERY</span></div>
-          <div class="card-desc">L3 sits between L2 (targeted) and L4 (human). Riskier automated fixes: service reinstall, dependency repair, config migration.</div>
+          <div class="card-title"><span class="done-check">&#10003;</span> Deep Repair Tier <span class="tag tag-recovery">RECOVERY</span></div>
+          <div class="card-desc">L3 sits between L2 (targeted) and L4 (human). Riskier automated fixes: service reinstall, dependency repair, disk cleanup.</div>
         </div>
         <div class="card">
-          <div class="card-title">Network Repair <span class="tag tag-recovery">RECOVERY</span></div>
+          <div class="card-title"><span class="done-check">&#10003;</span> Network Repair <span class="tag tag-recovery">RECOVERY</span></div>
           <div class="card-desc">Detect and fix DNS resolution failures, stale routes, TUN interface resets. Inspired by Monit's network checks.</div>
         </div>
         <div class="card">
-          <div class="card-title">Process Resurrection <span class="tag tag-recovery">RECOVERY</span></div>
+          <div class="card-title"><span class="done-check">&#10003;</span> Process Resurrection <span class="tag tag-recovery">RECOVERY</span></div>
           <div class="card-desc">If gateway binary is missing or corrupted, attempt re-download and reinstall from known-good source.</div>
         </div>
         <div class="card">
-          <div class="card-title">Dependency Health <span class="tag tag-recovery">RECOVERY</span></div>
+          <div class="card-title"><span class="done-check">&#10003;</span> Dependency Health <span class="tag tag-recovery">RECOVERY</span></div>
           <div class="card-desc">Check node_modules integrity, detect missing native modules, auto-rebuild when possible.</div>
         </div>
         <div class="card">
-          <div class="card-title">Safe Mode Boot <span class="tag tag-recovery">RECOVERY</span></div>
+          <div class="card-title"><span class="done-check">&#10003;</span> Safe Mode Boot <span class="tag tag-recovery">RECOVERY</span></div>
           <div class="card-desc">Start gateway with minimal config (no plugins, default routes) to isolate failures. Like Windows Safe Mode for OpenClaw.</div>
+        </div>
+        <div class="card">
+          <div class="card-title"><span class="done-check">&#10003;</span> Disk Cleanup <span class="tag tag-recovery">RECOVERY</span></div>
+          <div class="card-desc">Auto-free disk space when critically low. Truncate logs, delete rotated files, clear temp directories.</div>
         </div>
       </div>
     </div>
@@ -400,7 +404,7 @@
     <!-- PHASE 4: Observability -->
     <div class="phase">
       <div class="phase-header">
-        <div class="phase-dot next"></div>
+        <div class="phase-dot current"></div>
         <div class="phase-label">Phase 4</div>
         <div class="phase-title">Observability</div>
         <div class="phase-version">v1.5 &middot; Next</div>

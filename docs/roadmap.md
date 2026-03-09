@@ -17,7 +17,7 @@ For the interactive scrollable timeline, open [roadmap.html](roadmap.html) in yo
 - Auto port detection from openclaw.json
 - Incident browser CLI
 
-### Phase 3: L3 Recovery (v1.4) — In Progress
+### Phase 3: L3 Recovery (v1.4) — Shipped
 - **Deep repair tier** between L2 (targeted) and L4 (human)
 - Network repair (DNS, routes, TUN resets)
 - Process resurrection (re-download/reinstall)

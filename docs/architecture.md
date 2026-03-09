@@ -22,7 +22,7 @@ Aegis is a sidecar process that runs alongside your OpenClaw gateway. It continu
 │           ▼                                              │
 │  ┌──────────────────────────────────────────────┐       │
 │  │           Recovery Orchestrator               │       │
-│  │  L1: Restart  │  L2: Repair  │  L4: Alert    │       │
+│  │  L1: Restart │ L2: Repair │ L3: Deep │ L4: Alert │   │
 │  └──────────────────────────────────────────────┘       │
 │           │                                              │
 │           ▼                                              │
@@ -124,10 +124,26 @@ If pre-flight fails, **L1 restart is blocked** — no crash loop.
 - Applies targeted fix, then retries L1
 - 2 attempts with 60s cooldown
 
+**L3 — Deep Repair (30s-2min)**
+- Riskier automated fixes that go beyond pattern matching
+- 5 repair strategies: network repair, process resurrection, dependency rebuild, safe mode boot, disk cleanup
+- 2 attempts with 30s cooldown between each
+- If L3 succeeds, retries L1 restart
+
 **L4 — Human Alert (instant)**
 - Full incident report with timeline
 - Out-of-band delivery — never through the gateway
 - Alert includes health score, recovery actions taken, and failure reason
+
+### L3 Deep Repair — 5 Strategies
+
+| # | Strategy | Detection | Fix |
+|---|----------|-----------|-----|
+| 1 | **Network repair** | DNS fails, TUN device down, no default route | Flush DNS cache, bring TUN up, restore routing |
+| 2 | **Process resurrection** | `openclaw` binary missing from PATH | `npm install -g openclaw` to reinstall |
+| 3 | **Dependency health** | node_modules missing, corrupted lock file, failed require | Delete node_modules and `npm install --production` |
+| 4 | **Safe mode boot** | Process dead, config valid, normal restart failed | Start with minimal config (no plugins, default routes) |
+| 5 | **Disk cleanup** | Less than 50MB free on config partition | Truncate logs, delete rotated logs, clear temp files |
 
 ### Diagnosis Engine — 6 Failure Patterns
 
