@@ -288,6 +288,18 @@ Push-only providers (ntfy, Email, Pushover, Webhook) remain alert-only.
 
 9 commands: `/health`, `/status`, `/incidents`, `/recovery`, `/backups`, `/alerts`, `/version`, `/help`, `/repair`
 
+## Intelligence Engine
+
+### Anomaly Detection
+
+The anomaly detector learns what's normal from your health history and flags deviations:
+
+- **Score anomaly**: Aggregate health score drops significantly below baseline
+- **Latency anomaly**: Per-probe response times spike beyond normal variance
+- **Failure rate anomaly**: Probe failure rate jumps from near-zero to sustained failures
+
+Uses statistical analysis (mean + standard deviation) with configurable thresholds. Requires consecutive confirmations (default: 3) before alerting to avoid false positives. Feeds from the existing health history time-series.
+
 ## Platform Adapters
 
 ### systemd (Linux)

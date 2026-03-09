@@ -105,6 +105,15 @@ enabled = true                                 # enable recovery tracing
 basePath = "~/.openclaw/aegis/traces"
 maxTraces = 100                                # in-memory trace retention
 
+[intelligence.anomaly]
+enabled = true                                 # enable anomaly detection
+minBaseline = 60                               # minimum data points for baseline (60 = 10 min)
+baselineWindowMs = 3600000                     # baseline window (1 hour)
+scoreDeviationThreshold = 2.5                  # std deviations for score anomaly
+latencyDeviationThreshold = 3.0                # std deviations for latency anomaly
+confirmationCount = 3                          # consecutive detections before alerting
+alertCooldownMs = 900000                       # cooldown between alerts (15 min)
+
 [api]
 enabled = true                                 # enable REST API server
 port = 3001                                    # API port
@@ -250,6 +259,18 @@ See [Alerts](alerts.md) for channel configuration.
 | `enabled` | boolean | `true` | Enable recovery action tracing |
 | `basePath` | string | `~/.openclaw/aegis/traces` | Trace storage directory |
 | `maxTraces` | integer | `100` | In-memory trace retention count |
+
+### `[intelligence.anomaly]`
+
+| Key | Type | Default | Description |
+|-----|------|---------|-------------|
+| `enabled` | boolean | `true` | Enable anomaly detection |
+| `minBaseline` | integer | `60` | Minimum data points to establish baseline |
+| `baselineWindowMs` | integer | `3600000` | Baseline computation window (ms) |
+| `scoreDeviationThreshold` | number | `2.5` | Std deviations for score anomaly |
+| `latencyDeviationThreshold` | number | `3.0` | Std deviations for latency anomaly |
+| `confirmationCount` | integer | `3` | Consecutive detections before alerting |
+| `alertCooldownMs` | integer | `900000` | Cooldown between same-type alerts (ms) |
 
 ### `[api]`
 

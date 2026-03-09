@@ -19,6 +19,7 @@ import { StructuredLogger } from "../observability/logger.js";
 import { HealthHistory } from "../observability/health-history.js";
 import { SlaTracker } from "../observability/sla.js";
 import { RecoveryTracer } from "../observability/tracing.js";
+import { AnomalyDetector } from "../intelligence/anomaly.js";
 
 export class AegisDaemon {
   private readonly config: AegisConfig;
@@ -36,6 +37,7 @@ export class AegisDaemon {
   private readonly healthHistory: HealthHistory;
   private readonly slaTracker: SlaTracker;
   private readonly tracer: RecoveryTracer;
+  private readonly anomalyDetector: AnomalyDetector;
   private knownGoodTimer: NodeJS.Timeout | null = null;
   private running = false;
   private readonly startedAt = Date.now();
@@ -78,6 +80,21 @@ export class AegisDaemon {
       this.incidentLogger,
       config.monitoring.intervalMs,
     );
+    // Intelligence
+    const intel = config.intelligence;
+    this.anomalyDetector = new AnomalyDetector(
+      this.healthHistory,
+      this.alertDispatcher,
+      intel.anomaly.enabled ? {
+        minBaseline: intel.anomaly.minBaseline,
+        baselineWindowMs: intel.anomaly.baselineWindowMs,
+        scoreDeviationThreshold: intel.anomaly.scoreDeviationThreshold,
+        latencyDeviationThreshold: intel.anomaly.latencyDeviationThreshold,
+        confirmationCount: intel.anomaly.confirmationCount,
+        alertCooldownMs: intel.anomaly.alertCooldownMs,
+      } : undefined,
+    );
+
     this.metrics = new MetricsCollector({
       monitor: this.monitor,
       recovery: this.orchestrator,
@@ -170,6 +187,10 @@ export class AegisDaemon {
     return this.tracer;
   }
 
+  getAnomalyDetector(): AnomalyDetector {
+    return this.anomalyDetector;
+  }
+
   private setupAlertProviders(): void {
     for (const channel of this.config.alerts.channels) {
       switch (channel.type) {
@@ -228,6 +249,17 @@ export class AegisDaemon {
       // Record to health history
       if (this.config.observability.healthHistory.enabled) {
         this.healthHistory.record(score);
+      }
+
+      // Run anomaly detection
+      if (this.config.intelligence.anomaly.enabled) {
+        const anomalies = this.anomalyDetector.analyze();
+        if (anomalies.length > 0) {
+          this.logger.warn("intelligence", "anomalies_detected", {
+            count: anomalies.length,
+            types: anomalies.map((a) => a.type),
+          });
+        }
       }
 
       if (score.band === "healthy") {

@@ -2,6 +2,23 @@
 
 All notable changes to OpenClaw Aegis are documented here.
 
+## [1.6.0] - 2026-03-10
+
+### Added
+
+- **Anomaly detection engine** — learns baseline health patterns and alerts on statistical deviations
+  - Score anomaly: detects when aggregate health score drops below baseline (configurable σ threshold)
+  - Latency anomaly: detects per-probe latency spikes beyond normal variance
+  - Failure rate anomaly: detects sudden probe failure rate increases vs historical baseline
+  - Requires confirmation (default 3 consecutive detections) before alerting to avoid false positives
+  - Alert cooldown (default 15 min) prevents notification spam
+  - Feeds from existing health history time-series data
+- New config section: `[intelligence.anomaly]` with 7 tunable parameters
+- 2 new API endpoints:
+  - `GET /anomalies` — currently detected anomalies
+  - `GET /anomalies/baselines` — computed baselines for score and all probes
+- Total API endpoints: 28 (was 26)
+
 ## [1.5.3] - 2026-03-09
 
 ### Added

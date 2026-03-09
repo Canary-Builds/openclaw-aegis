@@ -158,6 +158,22 @@ export const aegisConfigSchema = z.object({
     })
     .default({}),
 
+  intelligence: z
+    .object({
+      anomaly: z
+        .object({
+          enabled: z.boolean().default(true),
+          minBaseline: z.number().int().min(10).default(60),
+          baselineWindowMs: z.number().int().min(60000).default(3600000),
+          scoreDeviationThreshold: z.number().min(1).default(2.5),
+          latencyDeviationThreshold: z.number().min(1).default(3.0),
+          confirmationCount: z.number().int().min(1).default(3),
+          alertCooldownMs: z.number().int().min(60000).default(900000),
+        })
+        .default({}),
+    })
+    .default({}),
+
   api: z
     .object({
       enabled: z.boolean().default(false),

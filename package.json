@@ -1,6 +1,6 @@
 {
   "name": "openclaw-aegis",
-  "version": "1.5.3",
+  "version": "1.6.0",
   "description": "Self-healing sidecar daemon for the OpenClaw gateway",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

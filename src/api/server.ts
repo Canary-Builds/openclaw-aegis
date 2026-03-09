@@ -12,6 +12,7 @@ import type { MetricsCollector } from "../observability/metrics.js";
 import type { HealthHistory } from "../observability/health-history.js";
 import type { SlaTracker } from "../observability/sla.js";
 import type { RecoveryTracer } from "../observability/tracing.js";
+import type { AnomalyDetector } from "../intelligence/anomaly.js";
 import { computeStatistics } from "../incidents/statistics.js";
 import type { AlertPayload } from "../types/index.js";
 
@@ -64,6 +65,7 @@ interface AegisApiDeps {
   healthHistory?: HealthHistory;
   slaTracker?: SlaTracker;
   tracer?: RecoveryTracer;
+  anomalyDetector?: AnomalyDetector;
 }
 
 export class AegisApiServer {
@@ -124,6 +126,10 @@ export class AegisApiServer {
     this.route("GET", "/sla/:period", this.handleSlaPeriod.bind(this));
     this.route("GET", "/traces", this.handleTraces.bind(this));
     this.route("GET", "/traces/:traceId", this.handleTraceById.bind(this));
+
+    // Intelligence (Phase 5)
+    this.route("GET", "/anomalies", this.handleAnomalies.bind(this));
+    this.route("GET", "/anomalies/baselines", this.handleBaselines.bind(this));
   }
 
   private route(method: string, path: string, handler: RouteHandler): void {
@@ -651,6 +657,26 @@ export class AegisApiServer {
         total: spans.length,
       },
     };
+  }
+
+  // --- Intelligence (Phase 5) ---
+
+  private handleAnomalies(): RouteResponse {
+    if (!this.deps.anomalyDetector) {
+      return { status: 501, body: { error: "Anomaly detection not available" } };
+    }
+    const anomalies = this.deps.anomalyDetector.getAnomalies();
+    return {
+      status: 200,
+      body: { anomalies, count: anomalies.length },
+    };
+  }
+
+  private handleBaselines(): RouteResponse {
+    if (!this.deps.anomalyDetector) {
+      return { status: 501, body: { error: "Anomaly detection not available" } };
+    }
+    return { status: 200, body: this.deps.anomalyDetector.getBaselines() };
   }
 
   // --- Server lifecycle ---

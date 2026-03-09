@@ -31,12 +31,31 @@ For the interactive scrollable timeline, open [roadmap.html](roadmap.html) in yo
 - SLA tracking and uptime reports (1h/24h/7d/30d presets)
 - OpenTelemetry-compatible recovery traces (span-level timing)
 
-### Phase 5: Intelligence (v2.0) — Planned
-- Anomaly detection (baseline + deviation)
-- Predictive alerts (memory leak trajectory, disk fill rate)
-- Root cause analysis (correlate probes + logs + events)
-- User-defined YAML runbooks
-- Alert noise reduction (grouping, dedup, smart escalation)
+### Phase 5a: Anomaly Detection (v1.6) — Shipped
+- Baseline learning from health history (score, latency, failure rates)
+- Statistical deviation detection (configurable σ thresholds)
+- Confirmation counting to prevent false positives
+- Alert cooldown to prevent spam
+
+### Phase 5b: Predictive Alerts (v1.7) — Planned
+- Memory leak trajectory projection
+- Disk fill rate prediction
+- Trend extrapolation from health history
+
+### Phase 5c: Root Cause Analysis (v1.8) — Planned
+- Correlate probes + logs + events
+- Pattern matching across failure signals
+- Actionable diagnosis suggestions
+
+### Phase 5d: YAML Runbooks (v1.9) — Planned
+- User-defined recovery playbooks
+- Custom triggers and step sequences
+- Version-controlled automation
+
+### Phase 5e: Alert Noise Reduction (v1.10) — Planned
+- Alert grouping and deduplication
+- Smart escalation (time-based)
+- Severity-based routing
 
 ### Phase 6: Fleet Management (v2.1) — Planned
 - **Fleet mode** — monitor multiple OpenClaw instances, not just local
