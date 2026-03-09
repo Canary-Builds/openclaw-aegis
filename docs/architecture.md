@@ -338,6 +338,16 @@ escalate_if_fails: true
 
 Runbooks are loaded from `~/.openclaw/aegis/runbooks/` (configurable). If a runbook resolves the issue, standard recovery is skipped entirely.
 
+### Alert Noise Reduction
+
+Prevents alert fatigue by intelligently managing alert volume:
+
+- **Grouping**: Related alerts (same severity + normalized title) are grouped within a configurable window (default: 5 min)
+- **Deduplication**: After 3 identical alerts, subsequent ones are suppressed until the next digest
+- **Digests**: Grouped alerts are sent as periodic summaries showing occurrence count and time range
+- **Smart escalation**: If an alert group persists for 15+ minutes, severity auto-escalates to critical
+- **Buffer protection**: Forces digest flush at configurable buffer size (default: 20) to prevent memory bloat
+
 ## Platform Adapters
 
 ### systemd (Linux)

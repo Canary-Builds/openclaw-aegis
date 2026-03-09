@@ -2,6 +2,24 @@
 
 All notable changes to OpenClaw Aegis are documented here.
 
+## [1.10.0] - 2026-03-14
+
+### Added
+
+- **Alert noise reduction** — intelligent alert grouping, deduplication, and escalation
+  - Groups related alerts by normalized severity + title pattern
+  - Deduplication: suppresses repeated alerts after configurable threshold (default: 3)
+  - Digest mode: batches grouped alerts into periodic summaries (default: every 5 min)
+  - Smart escalation: auto-escalates recurring alerts to critical after 15 min
+  - Buffer overflow protection: forces flush at configurable max buffer size
+  - Suppression rate tracking and active group monitoring
+- New config section: `[intelligence.noiseReduction]` with 6 tunable parameters
+- 2 new API endpoints:
+  - `GET /alerts/noise` — noise reduction statistics (suppression rate, grouped/escalated counts)
+  - `GET /alerts/groups` — active alert groups with counts and escalation status
+- Total API endpoints: 35 (was 33)
+- **Phase 5 Intelligence complete** — all 5 features shipped (anomaly detection, predictive alerts, root cause analysis, YAML runbooks, noise reduction)
+
 ## [1.9.0] - 2026-03-13
 
 ### Added

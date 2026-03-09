@@ -16,6 +16,7 @@ import type { AnomalyDetector } from "../intelligence/anomaly.js";
 import type { PredictiveAlerter } from "../intelligence/predictive.js";
 import type { RootCauseAnalyzer } from "../intelligence/rca.js";
 import type { RunbookEngine } from "../intelligence/runbooks.js";
+import type { AlertNoiseReducer } from "../intelligence/noise-reduction.js";
 import { computeStatistics } from "../incidents/statistics.js";
 import type { AlertPayload } from "../types/index.js";
 
@@ -72,6 +73,7 @@ interface AegisApiDeps {
   predictiveAlerter?: PredictiveAlerter;
   rootCauseAnalyzer?: RootCauseAnalyzer;
   runbookEngine?: RunbookEngine;
+  noiseReducer?: AlertNoiseReducer;
 }
 
 export class AegisApiServer {
@@ -141,6 +143,8 @@ export class AegisApiServer {
     this.route("GET", "/rca/:incidentId", this.handleRcaByIncident.bind(this));
     this.route("GET", "/runbooks", this.handleRunbooks.bind(this));
     this.route("GET", "/runbooks/results", this.handleRunbookResults.bind(this));
+    this.route("GET", "/alerts/noise", this.handleNoiseStats.bind(this));
+    this.route("GET", "/alerts/groups", this.handleAlertGroups.bind(this));
   }
 
   private route(method: string, path: string, handler: RouteHandler): void {
@@ -732,6 +736,21 @@ export class AegisApiServer {
         count: results.length,
       },
     };
+  }
+
+  private handleNoiseStats(): RouteResponse {
+    if (!this.deps.noiseReducer) {
+      return { status: 501, body: { error: "Noise reduction not available" } };
+    }
+    return { status: 200, body: this.deps.noiseReducer.getStats() };
+  }
+
+  private handleAlertGroups(): RouteResponse {
+    if (!this.deps.noiseReducer) {
+      return { status: 501, body: { error: "Noise reduction not available" } };
+    }
+    const groups = this.deps.noiseReducer.getActiveGroups();
+    return { status: 200, body: { groups, count: groups.length } };
   }
 
   private handleRunbooks(): RouteResponse {

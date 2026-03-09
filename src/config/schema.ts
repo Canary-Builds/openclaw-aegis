@@ -186,6 +186,16 @@ export const aegisConfigSchema = z.object({
           basePath: z.string().default("~/.openclaw/aegis/runbooks"),
         })
         .default({}),
+      noiseReduction: z
+        .object({
+          enabled: z.boolean().default(true),
+          groupingWindowMs: z.number().int().min(10000).default(300000),
+          dedupThreshold: z.number().int().min(1).default(3),
+          escalationDelayMs: z.number().int().min(60000).default(900000),
+          maxBufferSize: z.number().int().min(5).default(20),
+          digestIntervalMs: z.number().int().min(30000).default(300000),
+        })
+        .default({}),
     })
     .default({}),
 

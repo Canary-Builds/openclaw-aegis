@@ -56,10 +56,12 @@ For the interactive scrollable timeline, open [roadmap.html](roadmap.html) in yo
 - Step types: shell commands, delays, log messages
 - Runbooks execute before standard recovery cascade
 
-### Phase 5e: Alert Noise Reduction (v1.10) — Planned
-- Alert grouping and deduplication
-- Smart escalation (time-based)
-- Severity-based routing
+### Phase 5e: Alert Noise Reduction (v1.10) — Shipped
+- Alert grouping by normalized title/severity
+- Deduplication with configurable threshold
+- Periodic digest summaries
+- Time-based smart escalation to critical
+- Suppression rate tracking
 
 ### Phase 6: Fleet Management (v2.1) — Planned
 - **Fleet mode** — monitor multiple OpenClaw instances, not just local

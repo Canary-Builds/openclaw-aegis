@@ -125,6 +125,14 @@ alertCooldownMs = 1800000                      # cooldown between alerts (30 min
 enabled = false                                # enable YAML runbook engine
 basePath = "~/.openclaw/aegis/runbooks"        # directory for runbook files
 
+[intelligence.noiseReduction]
+enabled = true                                 # enable alert noise reduction
+groupingWindowMs = 300000                      # group related alerts within (5 min)
+dedupThreshold = 3                             # suppress after N identical alerts
+escalationDelayMs = 900000                     # escalate to critical after (15 min)
+maxBufferSize = 20                             # force flush at this buffer size
+digestIntervalMs = 300000                      # send grouped digests every (5 min)
+
 [api]
 enabled = true                                 # enable REST API server
 port = 3001                                    # API port
@@ -299,6 +307,17 @@ See [Alerts](alerts.md) for channel configuration.
 |-----|------|---------|-------------|
 | `enabled` | boolean | `false` | Enable YAML runbook engine |
 | `basePath` | string | `~/.openclaw/aegis/runbooks` | Directory for runbook files |
+
+### `[intelligence.noiseReduction]`
+
+| Key | Type | Default | Description |
+|-----|------|---------|-------------|
+| `enabled` | boolean | `true` | Enable alert noise reduction |
+| `groupingWindowMs` | integer | `300000` | Group related alerts within (ms) |
+| `dedupThreshold` | integer | `3` | Suppress after N identical alerts |
+| `escalationDelayMs` | integer | `900000` | Escalate to critical after (ms) |
+| `maxBufferSize` | integer | `20` | Force digest flush at buffer size |
+| `digestIntervalMs` | integer | `300000` | Send grouped digests every (ms) |
 
 ### `[api]`
 
