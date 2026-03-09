@@ -2,6 +2,14 @@
 
 All notable changes to OpenClaw Aegis are documented here.
 
+## [1.5.2] - 2026-03-09
+
+### Changed
+
+- **L3 deep repair is now disabled by default** (`l3Enabled = false`) — L3 strategies (network repair, process resurrection, dependency rebuild, safe mode boot, disk cleanup) are destructive and can affect other services on the server
+- When L3 is disabled and recovery reaches L4, the alert message explicitly tells you L3 is disabled and how to enable it (`l3Enabled = true` in `[recovery]` config)
+- New recovery event: `L3_DISABLED` — emitted when L3 would have run but is turned off
+
 ## [1.5.1] - 2026-03-09
 
 ### Added

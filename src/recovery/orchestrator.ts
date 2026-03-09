@@ -24,6 +24,7 @@ export type RecoveryEvent =
   | { type: "L3_SUCCESS"; pattern: string }
   | { type: "L3_FAILURE"; pattern: string }
   | { type: "L3_NO_MATCH" }
+  | { type: "L3_DISABLED" }
   | { type: "L4_ALERT"; reason: string; actions: RecoveryAction[] }
   | { type: "CIRCUIT_BREAKER_TRIPPED" }
   | { type: "FAST_PATH_L4"; reason: string };
@@ -80,19 +81,28 @@ export class RecoveryOrchestrator extends EventEmitter {
       }
 
       // L3: Deep repair — network, dependencies, safe mode, disk cleanup
-      const l3Result = await this.attemptL3();
-      actions.push(...l3Result.actions);
+      let l3Success = false;
+      if (this.config.recovery.l3Enabled) {
+        const l3Result = await this.attemptL3();
+        actions.push(...l3Result.actions);
+        l3Success = l3Result.success;
 
-      if (l3Result.success) {
-        const retryL1 = await this.attemptL1();
-        actions.push(...retryL1.actions);
-        if (retryL1.success) return actions;
+        if (l3Success) {
+          const retryL1 = await this.attemptL1();
+          actions.push(...retryL1.actions);
+          if (retryL1.success) return actions;
+        }
+      } else {
+        this.emitEvent({ type: "L3_DISABLED" });
       }
 
-      if (!l2Result.success && l2Result.noMatch && !l3Result.success) {
+      if (!l2Result.success && l2Result.noMatch && !l3Success) {
+        const l3Note = this.config.recovery.l3Enabled
+          ? ""
+          : " L3 deep repair is DISABLED — enable it with l3Enabled = true in [recovery] config if you want Aegis to attempt network repair, dependency rebuild, safe mode, and disk cleanup.";
         this.emitEvent({
           type: "FAST_PATH_L4",
-          reason: "L1+L2+L3 exhausted — no auto-repair available",
+          reason: `L1+L2 exhausted — no auto-repair available.${l3Note}`,
         });
       }
 
@@ -101,9 +111,16 @@ export class RecoveryOrchestrator extends EventEmitter {
         this.emitEvent({ type: "CIRCUIT_BREAKER_TRIPPED" });
       }
 
-      const reason = !l2Result.success && l2Result.noMatch && !l3Result.success
-        ? "No matching failure pattern — cannot auto-repair"
-        : "Recovery exhausted — L1+L2+L3 failed";
+      let reason: string;
+      if (!this.config.recovery.l3Enabled) {
+        reason = !l2Result.success && l2Result.noMatch
+          ? "No matching failure pattern — cannot auto-repair. L3 deep repair is DISABLED (enable with l3Enabled = true to allow network repair, dependency rebuild, safe mode boot, and disk cleanup)"
+          : "Recovery exhausted — L1+L2 failed. L3 deep repair is DISABLED (enable with l3Enabled = true)";
+      } else {
+        reason = !l2Result.success && l2Result.noMatch && !l3Success
+          ? "No matching failure pattern — cannot auto-repair"
+          : "Recovery exhausted — L1+L2+L3 failed";
+      }
       this.emitEvent({ type: "L4_ALERT", reason, actions });
 
       return actions;
