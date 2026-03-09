@@ -212,11 +212,65 @@ Events: `INCIDENT_START`, `L1_ATTEMPT`, `L1_SUCCESS`, `L2_ATTEMPT`, `L3_ATTEMPT`
 
 Used for MTTR calculation and post-incident review.
 
+## Observability
+
+### Prometheus Metrics
+
+`GET /metrics` returns all Aegis internals in Prometheus text exposition format. 26 metric families covering:
+
+- Health: `aegis_health_score`, `aegis_probe_score`, `aegis_probe_latency_ms`, `aegis_probe_healthy`
+- Recovery: `aegis_recovery_attempts_total`, `aegis_recovery_successes_total`, `aegis_recovery_failures_total` (by level)
+- Circuit breaker: `aegis_circuit_breaker_tripped`, `aegis_circuit_breaker_failed_cycles`
+- Incidents: `aegis_incidents_total`, `aegis_incidents_resolved`, `aegis_mttr_average_ms`
+- Alerts: `aegis_alerts_sent_total`, `aegis_alerts_failed_total`, `aegis_alerts_by_provider_total`
+- Process: `aegis_uptime_seconds`, `aegis_process_rss_bytes`, `aegis_process_heap_used_bytes`
+
+### Structured JSON Logging
+
+All daemon events are logged in JSONL format (one JSON object per line):
+
+```json
+{"timestamp":"2026-03-09T12:00:00.000Z","level":"info","component":"health","event":"check","score":10,"band":"healthy"}
+```
+
+Compatible with Loki, ELK, Datadog. Configurable log level (`debug`/`info`/`warn`/`error`), file output path, and stdout toggle.
+
+### Health History
+
+Stores every health check result as a time-series. Default retention: 8640 snapshots (24 hours at 10s intervals). Each snapshot records the aggregate score, band, and per-probe results.
+
+API endpoints:
+- `GET /health/history?since=1h` — snapshots in a time range
+- `GET /health/history?count=100` — latest N snapshots
+- `GET /health/history/stats?since=24h` — aggregated statistics (avg/min/max score, band counts, probe fail rates)
+- `GET /health/history/probe/:name?since=1h` — per-probe trend data
+
+### SLA Tracking
+
+Computes uptime percentages from health history data:
+
+```
+GET /sla → { "1h": {...}, "24h": {...}, "7d": {...}, "30d": {...} }
+GET /sla/7d → { uptimePercent: 99.7, totalIncidents: 2, averageMttrMs: 45000, ... }
+```
+
+Each report includes: uptime percentage, time in each health band, incident counts, average MTTR, and longest incident duration.
+
+### Recovery Tracing
+
+Records structured spans for every recovery action. Each recovery cycle gets a unique trace ID, and individual steps (L1 restart, L2 diagnosis, L3 repair) become spans with start/end times and attributes.
+
+Compatible with OpenTelemetry JSON format for import into Jaeger, Tempo, or Zipkin.
+
+API endpoints:
+- `GET /traces` — recent recovery traces (summary view)
+- `GET /traces/:traceId` — full span detail for a specific trace
+
 ## REST API
 
 The API server (`aegis serve`) exposes all Aegis internals via JSON endpoints on localhost. Designed for dashboard integration — the OpenClaw dashboard can poll `/probes` every 10s and render a live health view.
 
-18 endpoints covering health, probes, incidents, recovery, config, alerts, and system info. All sensitive data (tokens, passwords, webhook URLs) is scrubbed before sending. CORS enabled for frontend access.
+26 endpoints covering health, probes, incidents, recovery, config, alerts, observability, and system info. All sensitive data (tokens, passwords, webhook URLs) is scrubbed before sending. CORS enabled for frontend access.
 
 ## Bot Commands
 

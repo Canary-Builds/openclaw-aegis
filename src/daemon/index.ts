@@ -14,6 +14,11 @@ import { NtfyProvider } from "../alerts/providers/ntfy.js";
 import { WebhookProvider } from "../alerts/providers/webhook.js";
 import { TelegramProvider } from "../alerts/providers/telegram.js";
 import { expandHome } from "../config/loader.js";
+import { MetricsCollector } from "../observability/metrics.js";
+import { StructuredLogger } from "../observability/logger.js";
+import { HealthHistory } from "../observability/health-history.js";
+import { SlaTracker } from "../observability/sla.js";
+import { RecoveryTracer } from "../observability/tracing.js";
 
 export class AegisDaemon {
   private readonly config: AegisConfig;
@@ -26,8 +31,14 @@ export class AegisDaemon {
   private readonly alertDispatcher: AlertDispatcher;
   private readonly incidentLogger: IncidentLogger;
   private readonly platformAdapter: SystemdAdapter;
+  private readonly metrics: MetricsCollector;
+  private readonly logger: StructuredLogger;
+  private readonly healthHistory: HealthHistory;
+  private readonly slaTracker: SlaTracker;
+  private readonly tracer: RecoveryTracer;
   private knownGoodTimer: NodeJS.Timeout | null = null;
   private running = false;
+  private readonly startedAt = Date.now();
 
   constructor(config: AegisConfig) {
     this.config = config;
@@ -47,6 +58,34 @@ export class AegisDaemon {
     this.incidentLogger = new IncidentLogger(expandHome("~/.openclaw/aegis/incidents"));
     this.platformAdapter = new SystemdAdapter();
 
+    // Observability
+    const obs = config.observability;
+    this.logger = new StructuredLogger(
+      obs.logging.enabled ? expandHome(obs.logging.filePath) : null,
+      obs.logging.level,
+      obs.logging.stdout,
+    );
+    this.healthHistory = new HealthHistory(
+      expandHome(obs.healthHistory.basePath),
+      obs.healthHistory.maxEntries,
+    );
+    this.tracer = new RecoveryTracer(
+      expandHome(obs.tracing.basePath),
+      obs.tracing.maxTraces,
+    );
+    this.slaTracker = new SlaTracker(
+      this.healthHistory,
+      this.incidentLogger,
+      config.monitoring.intervalMs,
+    );
+    this.metrics = new MetricsCollector({
+      monitor: this.monitor,
+      recovery: this.orchestrator,
+      incidents: this.incidentLogger,
+      alerts: this.alertDispatcher,
+      startedAt: this.startedAt,
+    });
+
     this.setupAlertProviders();
     this.wireEvents();
   }
@@ -57,15 +96,16 @@ export class AegisDaemon {
     startupConfigValidation(this.config, this.backupManager);
 
     if (!this.alertDispatcher.hasProviders()) {
-      console.error(
-        "WARNING: No alert channels configured. Aegis cannot notify you during incidents. Run 'aegis init' to add alerts.",
-      );
+      this.logger.warn("alerts", "no_channels", {
+        message: "No alert channels configured. Run 'aegis init' to add alerts.",
+      });
     }
 
     this.configDetector.start();
     this.monitor.start();
     this.platformAdapter.startWatchdogHeartbeat();
     this.running = true;
+    this.logger.info("daemon", "started", { port: this.config.gateway.port });
   }
 
   stop(): void {
@@ -74,10 +114,12 @@ export class AegisDaemon {
     this.configDetector.stop();
     this.deadManSwitch.destroy();
     this.platformAdapter.stopWatchdogHeartbeat();
+    this.logger.close();
     if (this.knownGoodTimer) {
       clearTimeout(this.knownGoodTimer);
       this.knownGoodTimer = null;
     }
+    this.logger.info("daemon", "stopped");
   }
 
   isRunning(): boolean {
@@ -108,6 +150,26 @@ export class AegisDaemon {
     return this.deadManSwitch;
   }
 
+  getMetrics(): MetricsCollector {
+    return this.metrics;
+  }
+
+  getLogger(): StructuredLogger {
+    return this.logger;
+  }
+
+  getHealthHistory(): HealthHistory {
+    return this.healthHistory;
+  }
+
+  getSlaTracker(): SlaTracker {
+    return this.slaTracker;
+  }
+
+  getTracer(): RecoveryTracer {
+    return this.tracer;
+  }
+
   private setupAlertProviders(): void {
     for (const channel of this.config.alerts.channels) {
       switch (channel.type) {
@@ -136,21 +198,38 @@ export class AegisDaemon {
 
   private wireEvents(): void {
     this.configDetector.on("change", () => {
+      this.logger.info("config", "change_detected");
       if (this.config.deadManSwitch.enabled) {
         this.deadManSwitch.onConfigChange();
       }
     });
 
     this.configDetector.on("storm", (data: { count: number; windowMs: number }) => {
+      this.logger.warn("config", "write_storm", data);
       this.incidentLogger.log("CONFIG_WRITE_STORM", data);
     });
 
     this.monitor.on("escalate", (score: HealthScore) => {
+      this.logger.error("health", "escalation", {
+        score: score.total,
+        band: score.band,
+        failedProbes: score.probeResults.filter((p) => !p.healthy).map((p) => p.name),
+      });
       this.deadManSwitch.onUnhealthy();
       void this.handleEscalation(score);
     });
 
     this.monitor.on("check", (score: HealthScore) => {
+      this.logger.debug("health", "check", {
+        score: score.total,
+        band: score.band,
+      });
+
+      // Record to health history
+      if (this.config.observability.healthHistory.enabled) {
+        this.healthHistory.record(score);
+      }
+
       if (score.band === "healthy") {
         this.deadManSwitch.onHealthy();
         this.scheduleKnownGoodPromotion();
@@ -160,14 +239,18 @@ export class AegisDaemon {
     });
 
     this.orchestrator.on("recovery", (event: Record<string, unknown>) => {
-      this.incidentLogger.log(String(event["type"] ?? "RECOVERY_EVENT"), event);
+      const type = String(event["type"] ?? "RECOVERY_EVENT");
+      this.logger.info("recovery", type.toLowerCase(), event);
+      this.incidentLogger.log(type, event);
     });
 
     this.deadManSwitch.on("rolled-back", () => {
+      this.logger.warn("config-guardian", "dead_man_switch_rollback");
       this.incidentLogger.log("DEAD_MAN_SWITCH_ROLLBACK", {});
     });
 
     this.deadManSwitch.on("countdown-started", (ms: number) => {
+      this.logger.info("config-guardian", "dead_man_switch_countdown", { countdownMs: ms });
       this.incidentLogger.log("DEAD_MAN_SWITCH_COUNTDOWN", { countdownMs: ms });
     });
   }
@@ -176,12 +259,39 @@ export class AegisDaemon {
     this.incidentLogger.startIncident();
     this.incidentLogger.log("INCIDENT_START", { score: score.total, band: score.band });
 
+    // Start recovery trace
+    let traceId: string | undefined;
+    if (this.config.observability.tracing.enabled) {
+      traceId = this.tracer.startTrace("recovery-cycle");
+      this.tracer.setAttributes(traceId, {
+        "health.score": score.total,
+        "health.band": score.band,
+      });
+    }
+
     const actions = await this.orchestrator.recover(score);
+
+    // Record spans for each recovery action
+    if (traceId && this.config.observability.tracing.enabled) {
+      for (const action of actions) {
+        const spanId = this.tracer.startSpan(traceId, `${action.level}/${action.action}`, {
+          "recovery.level": action.level,
+          "recovery.action": action.action,
+          "recovery.result": action.result,
+          "recovery.duration_ms": action.durationMs,
+        });
+        this.tracer.endSpan(spanId, action.result === "success" ? "ok" : "error");
+      }
+    }
 
     const anySuccess = actions.some((a) => a.result === "success");
     if (anySuccess) {
+      this.logger.info("recovery", "incident_resolved", {
+        actions: actions.map((a) => `${a.level}/${a.action}:${a.result}`),
+      });
       this.incidentLogger.log("INCIDENT_RESOLVED", { actions });
       this.incidentLogger.endIncident();
+      if (traceId) this.tracer.endTrace(traceId, "ok");
     } else {
       const alert: AlertPayload = {
         severity: "critical",
@@ -194,20 +304,28 @@ export class AegisDaemon {
 
       const dispatchResult = await this.alertDispatcher.dispatch(alert);
 
+      // Record alert results in metrics
+      for (const r of dispatchResult.results) {
+        this.metrics.recordAlertResult(r.provider, r.success);
+      }
+
       if (!this.alertDispatcher.hasProviders() || dispatchResult.allFailed) {
+        this.logger.error("alerts", "l4_alert_failed", {
+          reason: !this.alertDispatcher.hasProviders()
+            ? "No alert channels configured"
+            : "All alert channels failed",
+        });
         this.incidentLogger.log("L4_ALERT_FAILED", {
           reason: !this.alertDispatcher.hasProviders()
             ? "No alert channels configured"
             : "All alert channels failed",
           results: dispatchResult.results,
         });
-        console.error(
-          "L4 escalation triggered but no alert channels configured -- entering monitoring-only mode. Human notification FAILED.",
-        );
       }
 
       this.incidentLogger.log("INCIDENT_UNRESOLVED", { actions });
       this.incidentLogger.endIncident();
+      if (traceId) this.tracer.endTrace(traceId, "error");
     }
   }
 
@@ -215,6 +333,7 @@ export class AegisDaemon {
     if (this.knownGoodTimer) return;
     this.knownGoodTimer = setTimeout(() => {
       this.backupManager.promoteToKnownGood();
+      this.logger.info("backup", "known_good_promoted");
       this.knownGoodTimer = null;
     }, this.backupManager.getKnownGoodStabilityMs());
   }

@@ -8,6 +8,10 @@ import type { BackupManager } from "../backup/manager.js";
 import type { IncidentLogger } from "../incidents/logger.js";
 import type { AlertDispatcher } from "../alerts/dispatcher.js";
 import type { DeadManSwitch } from "../config-guardian/dead-man-switch.js";
+import type { MetricsCollector } from "../observability/metrics.js";
+import type { HealthHistory } from "../observability/health-history.js";
+import type { SlaTracker } from "../observability/sla.js";
+import type { RecoveryTracer } from "../observability/tracing.js";
 import { computeStatistics } from "../incidents/statistics.js";
 import type { AlertPayload } from "../types/index.js";
 
@@ -42,7 +46,7 @@ function scrubObject(obj: unknown): unknown {
   return obj;
 }
 
-type RouteResponse = { status: number; body: unknown };
+type RouteResponse = { status: number; body: unknown; contentType?: string };
 type RouteHandler = (
   params: Record<string, string>,
   req: http.IncomingMessage,
@@ -56,6 +60,10 @@ interface AegisApiDeps {
   incidents?: IncidentLogger;
   alerts?: AlertDispatcher;
   deadManSwitch?: DeadManSwitch;
+  metrics?: MetricsCollector;
+  healthHistory?: HealthHistory;
+  slaTracker?: SlaTracker;
+  tracer?: RecoveryTracer;
 }
 
 export class AegisApiServer {
@@ -106,6 +114,16 @@ export class AegisApiServer {
     this.route("GET", "/version", this.handleVersion.bind(this));
     this.route("GET", "/uptime", this.handleUptime.bind(this));
     this.route("GET", "/platform", this.handlePlatform.bind(this));
+
+    // Observability (Phase 4)
+    this.route("GET", "/metrics", this.handleMetrics.bind(this));
+    this.route("GET", "/health/history", this.handleHealthHistory.bind(this));
+    this.route("GET", "/health/history/stats", this.handleHealthHistoryStats.bind(this));
+    this.route("GET", "/health/history/probe/:name", this.handleProbeTrend.bind(this));
+    this.route("GET", "/sla", this.handleSla.bind(this));
+    this.route("GET", "/sla/:period", this.handleSlaPeriod.bind(this));
+    this.route("GET", "/traces", this.handleTraces.bind(this));
+    this.route("GET", "/traces/:traceId", this.handleTraceById.bind(this));
   }
 
   private route(method: string, path: string, handler: RouteHandler): void {
@@ -138,7 +156,7 @@ export class AegisApiServer {
 
   // --- Health & Monitoring ---
 
-  private async handleHealth(): Promise<{ status: number; body: unknown }> {
+  private async handleHealth(): Promise<RouteResponse> {
     const score = this.deps.monitor.getLastScore();
     if (!score) {
       const freshScore = await this.deps.monitor.runAllProbes();
@@ -165,7 +183,7 @@ export class AegisApiServer {
     };
   }
 
-  private async handleProbes(): Promise<{ status: number; body: unknown }> {
+  private async handleProbes(): Promise<RouteResponse> {
     const score = this.deps.monitor.getLastScore() ?? (await this.deps.monitor.runAllProbes());
     return {
       status: 200,
@@ -183,9 +201,7 @@ export class AegisApiServer {
     };
   }
 
-  private async handleProbeByName(
-    params: Record<string, string>,
-  ): Promise<{ status: number; body: unknown }> {
+  private async handleProbeByName(params: Record<string, string>): Promise<RouteResponse> {
     const score = this.deps.monitor.getLastScore() ?? (await this.deps.monitor.runAllProbes());
     const probe = score.probeResults.find((p) => p.name === params.name);
     if (!probe) {
@@ -401,7 +417,7 @@ export class AegisApiServer {
     };
   }
 
-  private async handleAlertTest(): Promise<{ status: number; body: unknown }> {
+  private async handleAlertTest(): Promise<RouteResponse> {
     if (!this.deps.alerts || !this.deps.alerts.hasProviders()) {
       return { status: 400, body: { error: "No alert channels configured" } };
     }
@@ -455,7 +471,7 @@ export class AegisApiServer {
 
   // --- System ---
 
-  private async handleVersion(): Promise<{ status: number; body: unknown }> {
+  private async handleVersion(): Promise<RouteResponse> {
     let version = "unknown";
     try {
       const path = await import("node:path");
@@ -511,6 +527,132 @@ export class AegisApiServer {
     };
   }
 
+  // --- Observability (Phase 4) ---
+
+  private handleMetrics(): RouteResponse {
+    if (!this.deps.metrics) {
+      return { status: 501, body: { error: "Metrics not available" } };
+    }
+    return {
+      status: 200,
+      body: this.deps.metrics.render(),
+      contentType: "text/plain; version=0.0.4; charset=utf-8",
+    };
+  }
+
+  private handleHealthHistory(_p: Record<string, string>, req: http.IncomingMessage): RouteResponse {
+    if (!this.deps.healthHistory) {
+      return { status: 501, body: { error: "Health history not available" } };
+    }
+
+    // Parse query params: ?since=1h or ?since=3600000 or ?count=100
+    const url = new URL(req.url ?? "/", `http://${req.headers.host ?? "localhost"}`);
+    const sinceParam = url.searchParams.get("since");
+    const countParam = url.searchParams.get("count");
+
+    if (countParam) {
+      const count = parseInt(countParam, 10);
+      return { status: 200, body: { snapshots: this.deps.healthHistory.getLatest(count) } };
+    }
+
+    const sinceMs = sinceParam ? parseDuration(sinceParam) : 3600000; // default 1h
+    const snapshots = this.deps.healthHistory.getRange(sinceMs);
+    return { status: 200, body: { snapshots, count: snapshots.length, sinceMs } };
+  }
+
+  private handleHealthHistoryStats(_p: Record<string, string>, req: http.IncomingMessage): RouteResponse {
+    if (!this.deps.healthHistory) {
+      return { status: 501, body: { error: "Health history not available" } };
+    }
+
+    const url = new URL(req.url ?? "/", `http://${req.headers.host ?? "localhost"}`);
+    const sinceParam = url.searchParams.get("since");
+    const sinceMs = sinceParam ? parseDuration(sinceParam) : 3600000;
+
+    const stats = this.deps.healthHistory.computeStats(sinceMs);
+    return { status: 200, body: stats };
+  }
+
+  private handleProbeTrend(params: Record<string, string>, req: http.IncomingMessage): RouteResponse {
+    if (!this.deps.healthHistory) {
+      return { status: 501, body: { error: "Health history not available" } };
+    }
+
+    const url = new URL(req.url ?? "/", `http://${req.headers.host ?? "localhost"}`);
+    const sinceParam = url.searchParams.get("since");
+    const sinceMs = sinceParam ? parseDuration(sinceParam) : 3600000;
+
+    const trend = this.deps.healthHistory.getProbeTrend(params.name, sinceMs);
+    return { status: 200, body: { probe: params.name, trend, count: trend.length } };
+  }
+
+  private handleSla(): RouteResponse {
+    if (!this.deps.slaTracker) {
+      return { status: 501, body: { error: "SLA tracking not available" } };
+    }
+
+    return {
+      status: 200,
+      body: {
+        "1h": this.deps.slaTracker.report1h(),
+        "24h": this.deps.slaTracker.report24h(),
+        "7d": this.deps.slaTracker.report7d(),
+        "30d": this.deps.slaTracker.report30d(),
+      },
+    };
+  }
+
+  private handleSlaPeriod(params: Record<string, string>): RouteResponse {
+    if (!this.deps.slaTracker) {
+      return { status: 501, body: { error: "SLA tracking not available" } };
+    }
+
+    const periodMs = parseDuration(params.period);
+    return { status: 200, body: this.deps.slaTracker.generateReport(periodMs) };
+  }
+
+  private handleTraces(): RouteResponse {
+    if (!this.deps.tracer) {
+      return { status: 501, body: { error: "Tracing not available" } };
+    }
+
+    const traces = this.deps.tracer.getRecentTraces(20);
+    return {
+      status: 200,
+      body: {
+        traces: traces.map((spans) => ({
+          traceId: spans[0]?.traceId ?? "unknown",
+          spanCount: spans.length,
+          rootOperation: spans.find((s) => !s.parentSpanId)?.operationName ?? "unknown",
+          startTimeMs: Math.min(...spans.map((s) => s.startTimeMs)),
+          durationMs: Math.max(...spans.map((s) => s.endTimeMs)) - Math.min(...spans.map((s) => s.startTimeMs)),
+          status: spans.some((s) => s.status === "error") ? "error" : "ok",
+        })),
+        total: traces.length,
+      },
+    };
+  }
+
+  private handleTraceById(params: Record<string, string>): RouteResponse {
+    if (!this.deps.tracer) {
+      return { status: 501, body: { error: "Tracing not available" } };
+    }
+
+    const spans = this.deps.tracer.getTrace(params.traceId);
+    if (spans.length === 0) {
+      return { status: 404, body: { error: `Trace '${params.traceId}' not found` } };
+    }
+
+    return {
+      status: 200,
+      body: {
+        traceId: params.traceId,
+        spans,
+        total: spans.length,
+      },
+    };
+  }
+
   // --- Server lifecycle ---
 
   recordAlertResult(result: { provider: string; success: boolean; durationMs: number }): void {
@@ -549,9 +691,14 @@ export class AegisApiServer {
           return;
         }
 
-        const sendResponse = ({ status, body }: RouteResponse) => {
-          res.writeHead(status, { "Content-Type": "application/json" });
-          res.end(JSON.stringify(body, null, 2));
+        const sendResponse = ({ status, body, contentType }: RouteResponse) => {
+          const ct = contentType ?? "application/json";
+          res.writeHead(status, { "Content-Type": ct });
+          if (typeof body === "string") {
+            res.end(body);
+          } else {
+            res.end(JSON.stringify(body, null, 2));
+          }
         };
 
         const sendError = (err: unknown) => {
@@ -592,5 +739,24 @@ export class AegisApiServer {
 
   getAddress(): { host: string; port: number } {
     return { host: this.deps.config.api.host, port: this.deps.config.api.port };
+  }
+}
+
+/** Parse duration strings like "1h", "24h", "7d", "30m" to milliseconds */
+function parseDuration(input: string): number {
+  const num = parseInt(input, 10);
+  if (!isNaN(num) && input === String(num)) return num; // raw milliseconds
+
+  const match = input.match(/^(\d+)(ms|s|m|h|d)$/);
+  if (!match) return 3600000; // default 1h
+
+  const value = parseInt(match[1], 10);
+  switch (match[2]) {
+    case "ms": return value;
+    case "s": return value * 1000;
+    case "m": return value * 60000;
+    case "h": return value * 3600000;
+    case "d": return value * 86400000;
+    default: return 3600000;
   }
 }

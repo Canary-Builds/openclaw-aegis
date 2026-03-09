@@ -2,6 +2,27 @@
 
 All notable changes to OpenClaw Aegis are documented here.
 
+## [1.5.0] - 2026-03-09
+
+### Added
+
+- **Prometheus `/metrics` endpoint** — exposes health scores, probe results, recovery counts, circuit breaker state, alert stats, MTTR, and process memory in Prometheus text exposition format
+- **Structured JSON logging** — JSONL format logs compatible with Loki, ELK, Datadog. Configurable log level, file output, and stdout toggle
+- **Health history time-series** — stores every health check result over time (default: 24 hours at 10s intervals). Query by time range or count, compute trend statistics
+- **SLA tracking and uptime reports** — calculates uptime percentages, time in each health band, incident counts, and MTTR for any time period (1h/24h/7d/30d presets)
+- **Recovery tracing** — records structured spans for every recovery step with timing, compatible with OpenTelemetry JSON format for import into Jaeger/Tempo
+- 8 new API endpoints:
+  - `GET /metrics` — Prometheus scrape target
+  - `GET /health/history` — time-series health data (`?since=1h` or `?count=100`)
+  - `GET /health/history/stats` — aggregated health statistics
+  - `GET /health/history/probe/:name` — per-probe trend data
+  - `GET /sla` — uptime reports for all periods
+  - `GET /sla/:period` — uptime report for specific period
+  - `GET /traces` — recent recovery traces
+  - `GET /traces/:traceId` — full span detail for a trace
+- New config section: `[observability]` with `logging`, `healthHistory`, and `tracing` subsections
+- Total API endpoints: 26 (was 18)
+
 ## [1.4.0] - 2026-03-09
 
 ### Added

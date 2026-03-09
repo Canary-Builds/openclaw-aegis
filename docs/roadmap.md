@@ -24,12 +24,12 @@ For the interactive scrollable timeline, open [roadmap.html](roadmap.html) in yo
 - Dependency health (node_modules integrity)
 - Safe mode boot (minimal config startup)
 
-### Phase 4: Observability (v1.5) — Next
-- Prometheus /metrics endpoint
-- Structured JSON logging (Loki/ELK compatible)
-- Health history time-series
-- SLA tracking and uptime reports
-- OpenTelemetry traces for recovery actions
+### Phase 4: Observability (v1.5) — Shipped
+- Prometheus /metrics endpoint (26 metric families)
+- Structured JSON logging (Loki/ELK compatible, configurable level/output)
+- Health history time-series (24h default, per-probe trends)
+- SLA tracking and uptime reports (1h/24h/7d/30d presets)
+- OpenTelemetry-compatible recovery traces (span-level timing)
 
 ### Phase 5: Intelligence (v2.0) — Planned
 - Anomaly detection (baseline + deviation)

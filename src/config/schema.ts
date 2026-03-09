@@ -130,6 +130,33 @@ export const aegisConfigSchema = z.object({
     })
     .default({}),
 
+  observability: z
+    .object({
+      logging: z
+        .object({
+          enabled: z.boolean().default(true),
+          level: z.enum(["debug", "info", "warn", "error"]).default("info"),
+          filePath: z.string().default("~/.openclaw/aegis/logs/aegis.jsonl"),
+          stdout: z.boolean().default(true),
+        })
+        .default({}),
+      healthHistory: z
+        .object({
+          enabled: z.boolean().default(true),
+          maxEntries: z.number().int().min(100).default(8640),
+          basePath: z.string().default("~/.openclaw/aegis/history"),
+        })
+        .default({}),
+      tracing: z
+        .object({
+          enabled: z.boolean().default(true),
+          basePath: z.string().default("~/.openclaw/aegis/traces"),
+          maxTraces: z.number().int().min(10).default(100),
+        })
+        .default({}),
+    })
+    .default({}),
+
   api: z
     .object({
       enabled: z.boolean().default(false),

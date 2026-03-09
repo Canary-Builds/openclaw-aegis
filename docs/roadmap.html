@@ -401,34 +401,34 @@
       </div>
     </div>
 
-    <!-- PHASE 4: Observability -->
+    <!-- PHASE 4: Observability (DONE) -->
     <div class="phase">
       <div class="phase-header">
-        <div class="phase-dot current"></div>
+        <div class="phase-dot done"></div>
         <div class="phase-label">Phase 4</div>
         <div class="phase-title">Observability</div>
-        <div class="phase-version">v1.5 &middot; Next</div>
+        <div class="phase-version">v1.5 &middot; Shipped</div>
       </div>
       <div class="cards">
         <div class="card">
-          <div class="card-title">Prometheus Metrics <span class="tag tag-infra">INFRA</span></div>
-          <div class="card-desc">Expose /metrics endpoint in Prometheus format. Probe latencies, health scores, recovery counts, alert delivery times.</div>
+          <div class="card-title"><span class="done-check">&#10003;</span> Prometheus Metrics <span class="tag tag-infra">INFRA</span></div>
+          <div class="card-desc">GET /metrics in Prometheus text format. 26 metric families: health scores, probe latencies, recovery counts, alert stats, MTTR, process memory.</div>
         </div>
         <div class="card">
-          <div class="card-title">Structured Logging <span class="tag tag-dx">DX</span></div>
-          <div class="card-desc">JSON log output with severity levels, correlation IDs, and log rotation. Compatible with Loki, ELK, CloudWatch.</div>
+          <div class="card-title"><span class="done-check">&#10003;</span> Structured Logging <span class="tag tag-dx">DX</span></div>
+          <div class="card-desc">JSONL output with component, event, severity. Configurable level &amp; output. Compatible with Loki, ELK, Datadog.</div>
         </div>
         <div class="card">
-          <div class="card-title">Health History <span class="tag tag-probe">PROBES</span></div>
-          <div class="card-desc">Time-series storage of probe results. Trend analysis, degradation detection, capacity planning graphs.</div>
+          <div class="card-title"><span class="done-check">&#10003;</span> Health History <span class="tag tag-probe">PROBES</span></div>
+          <div class="card-desc">24h time-series of every health check. Per-probe trends, failure rates, score aggregation. Query via API with time range or count.</div>
         </div>
         <div class="card">
-          <div class="card-title">SLA Tracking <span class="tag tag-dx">DX</span></div>
-          <div class="card-desc">Uptime percentage, SLA compliance reports, availability windows. Inspired by Datadog SLO monitoring.</div>
+          <div class="card-title"><span class="done-check">&#10003;</span> SLA Tracking <span class="tag tag-dx">DX</span></div>
+          <div class="card-desc">Uptime percentage, time per health band, MTTR, longest incident. Presets: 1h/24h/7d/30d. Inspired by Datadog SLO monitoring.</div>
         </div>
         <div class="card">
-          <div class="card-title">OpenTelemetry Traces <span class="tag tag-infra">INFRA</span></div>
-          <div class="card-desc">Distributed tracing for recovery actions. See the full journey from probe failure to resolution.</div>
+          <div class="card-title"><span class="done-check">&#10003;</span> Recovery Traces <span class="tag tag-infra">INFRA</span></div>
+          <div class="card-desc">Structured spans for every recovery step with timing. OpenTelemetry-compatible JSON format for import into Jaeger/Tempo.</div>
         </div>
       </div>
     </div>
@@ -436,10 +436,10 @@
     <!-- PHASE 5: Intelligence -->
     <div class="phase">
       <div class="phase-header">
-        <div class="phase-dot future"></div>
+        <div class="phase-dot current"></div>
         <div class="phase-label">Phase 5</div>
         <div class="phase-title">Intelligence</div>
-        <div class="phase-version">v2.0 &middot; Planned</div>
+        <div class="phase-version">v2.0 &middot; Next</div>
       </div>
       <div class="cards">
         <div class="card">

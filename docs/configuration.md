@@ -88,6 +88,22 @@ apiToken = "your-app-api-token"
 userKey = "your-user-key"
 device = "myphone"                               # optional target device
 
+[observability.logging]
+enabled = true                                 # enable structured JSON logging
+level = "info"                                 # "debug", "info", "warn", "error"
+filePath = "~/.openclaw/aegis/logs/aegis.jsonl" # log file path
+stdout = true                                  # also write to stdout
+
+[observability.healthHistory]
+enabled = true                                 # enable health check time-series
+maxEntries = 8640                              # retention (8640 = 24h at 10s intervals)
+basePath = "~/.openclaw/aegis/history"
+
+[observability.tracing]
+enabled = true                                 # enable recovery tracing
+basePath = "~/.openclaw/aegis/traces"
+maxTraces = 100                                # in-memory trace retention
+
 [api]
 enabled = true                                 # enable REST API server
 port = 3001                                    # API port
@@ -207,6 +223,31 @@ Platform is auto-detected. `aegis init --auto` sets the correct default for your
 ### `[[alerts.channels]]`
 
 See [Alerts](alerts.md) for channel configuration.
+
+### `[observability.logging]`
+
+| Key | Type | Default | Description |
+|-----|------|---------|-------------|
+| `enabled` | boolean | `true` | Enable structured JSON logging |
+| `level` | string | `info` | Minimum log level (`debug`, `info`, `warn`, `error`) |
+| `filePath` | string | `~/.openclaw/aegis/logs/aegis.jsonl` | Log file path |
+| `stdout` | boolean | `true` | Also write logs to stdout/stderr |
+
+### `[observability.healthHistory]`
+
+| Key | Type | Default | Description |
+|-----|------|---------|-------------|
+| `enabled` | boolean | `true` | Enable health check time-series storage |
+| `maxEntries` | integer | `8640` | Max snapshots to retain (8640 = 24h at 10s) |
+| `basePath` | string | `~/.openclaw/aegis/history` | Storage directory |
+
+### `[observability.tracing]`
+
+| Key | Type | Default | Description |
+|-----|------|---------|-------------|
+| `enabled` | boolean | `true` | Enable recovery action tracing |
+| `basePath` | string | `~/.openclaw/aegis/traces` | Trace storage directory |
+| `maxTraces` | integer | `100` | In-memory trace retention count |
 
 ### `[api]`
 

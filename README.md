@@ -28,7 +28,8 @@ It stands between your gateway and disaster — a tireless sentinel that detects
 | **Heals** | L1 restart, L2 targeted repair, L3 deep repair (network, dependencies, safe mode, disk), config rollback — all automatic |
 | **Alerts** | 8 out-of-band providers (ntfy, Telegram, WhatsApp, Slack, Discord, Email, Pushover, webhook) that work even when the gateway is dead |
 | **Responds** | Message `/health` on Telegram, WhatsApp, Slack, or Discord — Aegis replies with real-time status |
-| **Remembers** | Full incident timeline, MTTR tracking, and a 18-endpoint REST API for dashboard integration |
+| **Observes** | Prometheus metrics, structured JSON logs, health time-series, SLA reports, recovery traces |
+| **Remembers** | Full incident timeline, MTTR tracking, and a 26-endpoint REST API for dashboard integration |
 
 **Total downtime: ~15 seconds instead of hours.**
 
@@ -130,7 +131,7 @@ Anti-flap protection, circuit breakers, and exponential backoff prevent crash lo
 | [CLI Reference](docs/cli-reference.md) | Every command with examples |
 | [Contributing](docs/contributing.md) | Dev setup, testing, PR process |
 | [Releasing](docs/releasing.md) | Version bumps, npm publish, GitHub releases |
-| [Roadmap](docs/roadmap.md) | What's coming — L3 recovery, observability, fleet management |
+| [Roadmap](docs/roadmap.md) | What's coming — intelligence, fleet management, ecosystem |
 
 ---
 

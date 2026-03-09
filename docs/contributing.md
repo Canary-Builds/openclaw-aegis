@@ -89,8 +89,14 @@ openclaw-aegis/
         email.ts            # SMTP email (STARTTLS/TLS)
         pushover.ts         # Pushover push notifications
         webhook.ts          # Generic webhook with HMAC signing
+    observability/
+      metrics.ts            # Prometheus metrics collector
+      logger.ts             # Structured JSON logger (JSONL)
+      health-history.ts     # Health check time-series store
+      sla.ts                # SLA tracking and uptime reports
+      tracing.ts            # Recovery action tracer (OpenTelemetry-compatible)
     api/
-      server.ts             # REST API server (18 endpoints)
+      server.ts             # REST API server (26 endpoints)
     bot/
       commands.ts           # Shared command handler (8 commands)
       telegram.ts           # Telegram long polling listener
