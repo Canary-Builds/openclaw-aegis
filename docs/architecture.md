@@ -320,6 +320,24 @@ Correlates probe failures, log patterns, and incident events to identify the act
 - **Actionable suggestions**: Each signature includes specific remediation steps
 - Auto-runs during escalation and logs results to the incident timeline for post-mortem analysis
 
+### YAML Runbooks
+
+User-defined recovery playbooks that execute before standard L1/L2/L3 recovery:
+
+```yaml
+name: whatsapp-reconnect
+trigger:
+  probe: channels
+  message_contains: WhatsApp
+steps:
+  - run: openclaw channels restart whatsapp
+  - wait: 10s
+  - run: openclaw channels status --json
+escalate_if_fails: true
+```
+
+Runbooks are loaded from `~/.openclaw/aegis/runbooks/` (configurable). If a runbook resolves the issue, standard recovery is skipped entirely.
+
 ## Platform Adapters
 
 ### systemd (Linux)

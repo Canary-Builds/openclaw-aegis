@@ -15,6 +15,7 @@ import type { RecoveryTracer } from "../observability/tracing.js";
 import type { AnomalyDetector } from "../intelligence/anomaly.js";
 import type { PredictiveAlerter } from "../intelligence/predictive.js";
 import type { RootCauseAnalyzer } from "../intelligence/rca.js";
+import type { RunbookEngine } from "../intelligence/runbooks.js";
 import { computeStatistics } from "../incidents/statistics.js";
 import type { AlertPayload } from "../types/index.js";
 
@@ -70,6 +71,7 @@ interface AegisApiDeps {
   anomalyDetector?: AnomalyDetector;
   predictiveAlerter?: PredictiveAlerter;
   rootCauseAnalyzer?: RootCauseAnalyzer;
+  runbookEngine?: RunbookEngine;
 }
 
 export class AegisApiServer {
@@ -137,6 +139,8 @@ export class AegisApiServer {
     this.route("GET", "/predictions", this.handlePredictions.bind(this));
     this.route("GET", "/rca", this.handleRca.bind(this));
     this.route("GET", "/rca/:incidentId", this.handleRcaByIncident.bind(this));
+    this.route("GET", "/runbooks", this.handleRunbooks.bind(this));
+    this.route("GET", "/runbooks/results", this.handleRunbookResults.bind(this));
   }
 
   private route(method: string, path: string, handler: RouteHandler): void {
@@ -728,6 +732,35 @@ export class AegisApiServer {
         count: results.length,
       },
     };
+  }
+
+  private handleRunbooks(): RouteResponse {
+    if (!this.deps.runbookEngine) {
+      return { status: 501, body: { error: "Runbook engine not available (enable with intelligence.runbooks.enabled = true)" } };
+    }
+    const runbooks = this.deps.runbookEngine.getRunbooks();
+    return {
+      status: 200,
+      body: {
+        runbooks: runbooks.map((r) => ({
+          name: r.name,
+          description: r.description ?? null,
+          trigger: r.trigger,
+          stepCount: r.steps.length,
+          enabled: r.enabled !== false,
+          escalateIfFails: r.escalate_if_fails ?? false,
+        })),
+        count: runbooks.length,
+      },
+    };
+  }
+
+  private handleRunbookResults(): RouteResponse {
+    if (!this.deps.runbookEngine) {
+      return { status: 501, body: { error: "Runbook engine not available" } };
+    }
+    const results = this.deps.runbookEngine.getLastResults();
+    return { status: 200, body: { results, count: results.length } };
   }
 
   private handlePredictions(): RouteResponse {

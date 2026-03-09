@@ -22,6 +22,7 @@ import { RecoveryTracer } from "../observability/tracing.js";
 import { AnomalyDetector } from "../intelligence/anomaly.js";
 import { PredictiveAlerter } from "../intelligence/predictive.js";
 import { RootCauseAnalyzer } from "../intelligence/rca.js";
+import { RunbookEngine } from "../intelligence/runbooks.js";
 
 export class AegisDaemon {
   private readonly config: AegisConfig;
@@ -42,6 +43,7 @@ export class AegisDaemon {
   private readonly anomalyDetector: AnomalyDetector;
   private readonly predictiveAlerter: PredictiveAlerter;
   private readonly rootCauseAnalyzer: RootCauseAnalyzer;
+  private readonly runbookEngine?: RunbookEngine;
   private knownGoodTimer: NodeJS.Timeout | null = null;
   private predictiveCheckCount = 0;
   private running = false;
@@ -117,6 +119,9 @@ export class AegisDaemon {
     );
 
     this.rootCauseAnalyzer = new RootCauseAnalyzer(this.healthHistory, this.incidentLogger);
+    if (intel.runbooks.enabled) {
+      this.runbookEngine = new RunbookEngine(expandHome(intel.runbooks.basePath));
+    }
 
     this.metrics = new MetricsCollector({
       monitor: this.monitor,
@@ -220,6 +225,10 @@ export class AegisDaemon {
 
   getRootCauseAnalyzer(): RootCauseAnalyzer {
     return this.rootCauseAnalyzer;
+  }
+
+  getRunbookEngine(): RunbookEngine | undefined {
+    return this.runbookEngine;
   }
 
   private setupAlertProviders(): void {
@@ -364,6 +373,26 @@ export class AegisDaemon {
         "health.score": score.total,
         "health.band": score.band,
       });
+    }
+
+    // Try runbooks first if enabled
+    if (this.runbookEngine) {
+      const runbookResults = await this.runbookEngine.evaluate(score);
+      if (runbookResults.length > 0) {
+        this.logger.info("intelligence", "runbooks_executed", {
+          count: runbookResults.length,
+          results: runbookResults.map((r) => `${r.runbook}:${r.success ? "ok" : "fail"}`),
+        });
+        const anyRunbookSuccess = runbookResults.some((r) => r.success);
+        if (anyRunbookSuccess) {
+          this.incidentLogger.log("RUNBOOK_RESOLVED", {
+            runbooks: runbookResults.map((r) => ({ name: r.runbook, success: r.success })),
+          });
+          this.incidentLogger.endIncident();
+          if (traceId) this.tracer.endTrace(traceId, "ok");
+          return;
+        }
+      }
     }
 
     const actions = await this.orchestrator.recover(score);

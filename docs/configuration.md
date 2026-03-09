@@ -121,6 +121,10 @@ trendWindowMs = 7200000                        # trend analysis window (2 hours)
 warningHorizonMs = 3600000                     # alert when breach predicted within (1 hour)
 alertCooldownMs = 1800000                      # cooldown between alerts (30 min)
 
+[intelligence.runbooks]
+enabled = false                                # enable YAML runbook engine
+basePath = "~/.openclaw/aegis/runbooks"        # directory for runbook files
+
 [api]
 enabled = true                                 # enable REST API server
 port = 3001                                    # API port
@@ -288,6 +292,13 @@ See [Alerts](alerts.md) for channel configuration.
 | `trendWindowMs` | integer | `7200000` | Trend analysis window (ms) |
 | `warningHorizonMs` | integer | `3600000` | Alert when breach predicted within (ms) |
 | `alertCooldownMs` | integer | `1800000` | Cooldown between same-type alerts (ms) |
+
+### `[intelligence.runbooks]`
+
+| Key | Type | Default | Description |
+|-----|------|---------|-------------|
+| `enabled` | boolean | `false` | Enable YAML runbook engine |
+| `basePath` | string | `~/.openclaw/aegis/runbooks` | Directory for runbook files |
 
 ### `[api]`
 

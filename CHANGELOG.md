@@ -2,6 +2,23 @@
 
 All notable changes to OpenClaw Aegis are documented here.
 
+## [1.9.0] - 2026-03-13
+
+### Added
+
+- **YAML runbook engine** — user-defined recovery playbooks with custom triggers and step sequences
+  - Trigger on probe failures, health bands, or message patterns
+  - Steps: `run` (shell commands), `wait` (delays), `log` (messages)
+  - Runbooks execute before standard L1/L2/L3 recovery — if a runbook resolves the issue, recovery is skipped
+  - Timeout protection (default 60s per runbook)
+  - Supports both JSON and YAML format runbook files
+  - `escalate_if_fails` option to continue to standard recovery on failure
+- New config section: `[intelligence.runbooks]` (`enabled`, `basePath`)
+- 2 new API endpoints:
+  - `GET /runbooks` — list loaded runbook definitions
+  - `GET /runbooks/results` — results from last runbook evaluation
+- Total API endpoints: 33 (was 31)
+
 ## [1.8.0] - 2026-03-12
 
 ### Added

@@ -180,6 +180,12 @@ export const aegisConfigSchema = z.object({
           alertCooldownMs: z.number().int().min(60000).default(1800000),
         })
         .default({}),
+      runbooks: z
+        .object({
+          enabled: z.boolean().default(false),
+          basePath: z.string().default("~/.openclaw/aegis/runbooks"),
+        })
+        .default({}),
     })
     .default({}),
 

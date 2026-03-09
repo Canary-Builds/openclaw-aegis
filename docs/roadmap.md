@@ -50,10 +50,11 @@ For the interactive scrollable timeline, open [roadmap.html](roadmap.html) in yo
 - Per-incident post-mortem analysis
 - Actionable suggestions for each root cause
 
-### Phase 5d: YAML Runbooks (v1.9) — Planned
-- User-defined recovery playbooks
-- Custom triggers and step sequences
-- Version-controlled automation
+### Phase 5d: YAML Runbooks (v1.9) — Shipped
+- User-defined recovery playbooks in YAML/JSON
+- Custom triggers (probe, band, message pattern)
+- Step types: shell commands, delays, log messages
+- Runbooks execute before standard recovery cascade
 
 ### Phase 5e: Alert Noise Reduction (v1.10) — Planned
 - Alert grouping and deduplication
