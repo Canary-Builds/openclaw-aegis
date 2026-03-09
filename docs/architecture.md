@@ -311,6 +311,15 @@ Trend analysis engine that projects when thresholds will be breached:
 
 Uses linear regression with R² confidence scoring. Only alerts when predictions fall within a configurable warning horizon (default: 1 hour). Runs every 10th health check to minimize CPU overhead.
 
+### Root Cause Analysis
+
+Correlates probe failures, log patterns, and incident events to identify the actual cause of failures:
+
+- **10 failure signatures**: OOM kill, port conflict, config corruption, network failure, disk exhaustion, CPU saturation, channel disconnect, process crash, WebSocket failure, cascading failure
+- **Confidence scoring**: Required probe matches (40%), optional probe correlation (30%), log pattern evidence (30%)
+- **Actionable suggestions**: Each signature includes specific remediation steps
+- Auto-runs during escalation and logs results to the incident timeline for post-mortem analysis
+
 ## Platform Adapters
 
 ### systemd (Linux)

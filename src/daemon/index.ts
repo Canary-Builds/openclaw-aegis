@@ -21,6 +21,7 @@ import { SlaTracker } from "../observability/sla.js";
 import { RecoveryTracer } from "../observability/tracing.js";
 import { AnomalyDetector } from "../intelligence/anomaly.js";
 import { PredictiveAlerter } from "../intelligence/predictive.js";
+import { RootCauseAnalyzer } from "../intelligence/rca.js";
 
 export class AegisDaemon {
   private readonly config: AegisConfig;
@@ -40,6 +41,7 @@ export class AegisDaemon {
   private readonly tracer: RecoveryTracer;
   private readonly anomalyDetector: AnomalyDetector;
   private readonly predictiveAlerter: PredictiveAlerter;
+  private readonly rootCauseAnalyzer: RootCauseAnalyzer;
   private knownGoodTimer: NodeJS.Timeout | null = null;
   private predictiveCheckCount = 0;
   private running = false;
@@ -113,6 +115,8 @@ export class AegisDaemon {
         alertCooldownMs: intel.predictive.alertCooldownMs,
       } : undefined,
     );
+
+    this.rootCauseAnalyzer = new RootCauseAnalyzer(this.healthHistory, this.incidentLogger);
 
     this.metrics = new MetricsCollector({
       monitor: this.monitor,
@@ -212,6 +216,10 @@ export class AegisDaemon {
 
   getPredictiveAlerter(): PredictiveAlerter {
     return this.predictiveAlerter;
+  }
+
+  getRootCauseAnalyzer(): RootCauseAnalyzer {
+    return this.rootCauseAnalyzer;
   }
 
   private setupAlertProviders(): void {
@@ -324,7 +332,29 @@ export class AegisDaemon {
 
   private async handleEscalation(score: HealthScore): Promise<void> {
     this.incidentLogger.startIncident();
-    this.incidentLogger.log("INCIDENT_START", { score: score.total, band: score.band });
+    this.incidentLogger.log("INCIDENT_START", {
+      score: score.total,
+      band: score.band,
+      failedProbes: score.probeResults.filter((p) => !p.healthy).map((p) => p.name),
+    });
+
+    // Run root cause analysis
+    const rcaResults = this.rootCauseAnalyzer.analyze();
+    if (rcaResults.length > 0) {
+      const top = rcaResults[0];
+      this.logger.info("intelligence", "root_cause_analysis", {
+        rootCause: top.rootCause,
+        confidence: top.confidence,
+        correlatedProbes: top.correlatedProbes,
+      });
+      this.incidentLogger.log("ROOT_CAUSE_ANALYSIS", {
+        candidates: rcaResults.map((r) => ({
+          rootCause: r.rootCause,
+          confidence: r.confidence,
+          suggestion: r.suggestion,
+        })),
+      });
+    }
 
     // Start recovery trace
     let traceId: string | undefined;

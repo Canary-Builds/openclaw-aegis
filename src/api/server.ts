@@ -14,6 +14,7 @@ import type { SlaTracker } from "../observability/sla.js";
 import type { RecoveryTracer } from "../observability/tracing.js";
 import type { AnomalyDetector } from "../intelligence/anomaly.js";
 import type { PredictiveAlerter } from "../intelligence/predictive.js";
+import type { RootCauseAnalyzer } from "../intelligence/rca.js";
 import { computeStatistics } from "../incidents/statistics.js";
 import type { AlertPayload } from "../types/index.js";
 
@@ -68,6 +69,7 @@ interface AegisApiDeps {
   tracer?: RecoveryTracer;
   anomalyDetector?: AnomalyDetector;
   predictiveAlerter?: PredictiveAlerter;
+  rootCauseAnalyzer?: RootCauseAnalyzer;
 }
 
 export class AegisApiServer {
@@ -133,6 +135,8 @@ export class AegisApiServer {
     this.route("GET", "/anomalies", this.handleAnomalies.bind(this));
     this.route("GET", "/anomalies/baselines", this.handleBaselines.bind(this));
     this.route("GET", "/predictions", this.handlePredictions.bind(this));
+    this.route("GET", "/rca", this.handleRca.bind(this));
+    this.route("GET", "/rca/:incidentId", this.handleRcaByIncident.bind(this));
   }
 
   private route(method: string, path: string, handler: RouteHandler): void {
@@ -680,6 +684,50 @@ export class AegisApiServer {
       return { status: 501, body: { error: "Anomaly detection not available" } };
     }
     return { status: 200, body: this.deps.anomalyDetector.getBaselines() };
+  }
+
+  private handleRca(): RouteResponse {
+    if (!this.deps.rootCauseAnalyzer) {
+      return { status: 501, body: { error: "Root cause analysis not available" } };
+    }
+    const results = this.deps.rootCauseAnalyzer.analyze();
+    return {
+      status: 200,
+      body: {
+        candidates: results.map((r) => ({
+          rootCause: r.rootCause,
+          confidence: (r.confidence * 100).toFixed(0) + "%",
+          evidence: r.evidence,
+          suggestion: r.suggestion,
+          correlatedProbes: r.correlatedProbes,
+        })),
+        count: results.length,
+      },
+    };
+  }
+
+  private handleRcaByIncident(params: Record<string, string>): RouteResponse {
+    if (!this.deps.rootCauseAnalyzer) {
+      return { status: 501, body: { error: "Root cause analysis not available" } };
+    }
+    const results = this.deps.rootCauseAnalyzer.analyzeIncident(params.incidentId);
+    if (results.length === 0) {
+      return { status: 404, body: { error: `No RCA results for incident '${params.incidentId}'` } };
+    }
+    return {
+      status: 200,
+      body: {
+        incidentId: params.incidentId,
+        candidates: results.map((r) => ({
+          rootCause: r.rootCause,
+          confidence: (r.confidence * 100).toFixed(0) + "%",
+          evidence: r.evidence,
+          suggestion: r.suggestion,
+          correlatedProbes: r.correlatedProbes,
+        })),
+        count: results.length,
+      },
+    };
   }
 
   private handlePredictions(): RouteResponse {

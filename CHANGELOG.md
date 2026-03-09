@@ -2,6 +2,22 @@
 
 All notable changes to OpenClaw Aegis are documented here.
 
+## [1.8.0] - 2026-03-12
+
+### Added
+
+- **Root cause analysis engine** — correlates probe failures, log patterns, and incident events to identify why failures happen
+  - 10 failure signatures: OOM kill, port conflict, config corruption, network failure, disk exhaustion, CPU saturation, channel disconnect, process crash, WebSocket failure, cascading failure
+  - Confidence scoring based on required probe matches, optional probe correlation, and log pattern evidence
+  - Per-incident analysis: `GET /rca/:incidentId` for post-mortem investigation
+  - Live analysis: `GET /rca` for current state root cause identification
+  - Actionable suggestions for each identified root cause
+  - Auto-runs during escalation, results logged to incident timeline
+- 2 new API endpoints:
+  - `GET /rca` — live root cause analysis
+  - `GET /rca/:incidentId` — root cause analysis for specific incident
+- Total API endpoints: 31 (was 29)
+
 ## [1.7.0] - 2026-03-11
 
 ### Added

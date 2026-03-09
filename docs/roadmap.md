@@ -44,10 +44,11 @@ For the interactive scrollable timeline, open [roadmap.html](roadmap.html) in yo
 - Latency breach forecasting for critical probes
 - Linear regression with R² confidence
 
-### Phase 5c: Root Cause Analysis (v1.8) — Planned
-- Correlate probes + logs + events
-- Pattern matching across failure signals
-- Actionable diagnosis suggestions
+### Phase 5c: Root Cause Analysis (v1.8) — Shipped
+- 10 failure signature patterns with confidence scoring
+- Correlates probe failures + log patterns + incident events
+- Per-incident post-mortem analysis
+- Actionable suggestions for each root cause
 
 ### Phase 5d: YAML Runbooks (v1.9) — Planned
 - User-defined recovery playbooks
