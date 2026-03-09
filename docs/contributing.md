@@ -68,7 +68,8 @@ openclaw-aegis/
         log-tail.ts         # Error pattern scanning
         resolve-pid.ts      # Shared PID resolution (launchd + systemd + file)
     recovery/
-      orchestrator.ts       # L1/L2/L4 recovery cascade
+      orchestrator.ts       # L1/L2/L3/L4 recovery cascade
+      l3-patterns.ts        # L3 deep repair patterns (5 strategies)
       circuit-breaker.ts    # Circuit breaker for recovery loops
     diagnosis/
       engine.ts             # 6 failure pattern matchers

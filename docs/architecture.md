@@ -208,7 +208,7 @@ Every recovery action is logged with full timeline:
   └── {incident-id}.jsonl    ← append-only event log
 ```
 
-Events: `INCIDENT_START`, `L1_ATTEMPT`, `L1_SUCCESS`, `L2_ATTEMPT`, `DEAD_MAN_SWITCH_ROLLBACK`, `L4_ALERT`, `INCIDENT_RESOLVED`, `INCIDENT_UNRESOLVED`
+Events: `INCIDENT_START`, `L1_ATTEMPT`, `L1_SUCCESS`, `L2_ATTEMPT`, `L3_ATTEMPT`, `L3_SUCCESS`, `L3_FAILURE`, `DEAD_MAN_SWITCH_ROLLBACK`, `L4_ALERT`, `INCIDENT_RESOLVED`, `INCIDENT_UNRESOLVED`
 
 Used for MTTR calculation and post-incident review.
 

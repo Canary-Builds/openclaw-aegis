@@ -264,7 +264,7 @@ X-Aegis-Signature: sha256=<hmac-hex-digest>
 {
   "severity": "critical",
   "title": "Gateway Down — Recovery Failed",
-  "body": "L1 restart failed (3 attempts). L2 repair failed...",
+  "body": "L1 restart failed (3 attempts). L2 repair failed. L3 deep repair failed...",
   "timestamp": "2024-01-15T10:30:00.000Z"
 }
 ```
