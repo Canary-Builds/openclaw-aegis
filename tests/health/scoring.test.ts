@@ -19,10 +19,11 @@ describe("computeHealthScore", () => {
       makeProbe("cpu", true, 2),
       makeProbe("disk", true, 2),
       makeProbe("logTail", true, 2),
+      makeProbe("channels", true, 2),
     ];
 
     const score = computeHealthScore(results);
-    // Raw: (2*2)*4 + (2*1)*6 = 28. Normalized: (28/28)*10 = 10
+    // Raw: (2*2)*4 + (2*1)*7 = 30. Normalized: (30/30)*10 = 10
     expect(score.total).toBe(10);
     expect(score.band).toBe("healthy");
   });
@@ -39,9 +40,10 @@ describe("computeHealthScore", () => {
       makeProbe("cpu", true, 2),
       makeProbe("disk", true, 2),
       makeProbe("logTail", true, 2),
+      makeProbe("channels", false, 0),
     ];
 
-    // Raw: (2*1)*3 = 6. Normalized: round((6/28)*10) = 2 → critical
+    // Raw: (2*1)*3 = 6. Normalized: round((6/30)*10) = 2 → critical
     const score = computeHealthScore(results);
     expect(score.total).toBe(2);
     expect(score.band).toBe("critical");
@@ -59,11 +61,12 @@ describe("computeHealthScore", () => {
       makeProbe("cpu", true, 2),
       makeProbe("disk", true, 2),
       makeProbe("logTail", true, 2),
+      makeProbe("channels", true, 2),
     ];
 
-    // Raw: (2*2)+(0)+(0)+(2*2)+(0)+(2*1)+(2*1)+(2*1)+(2*1)+(2*1) = 18. Normalized: round((18/28)*10) = 6
-    const score = computeHealthScore(results, { healthyMin: 7, degradedMin: 4 });
-    expect(score.total).toBe(6);
+    // Raw: (2*2)+(0)+(0)+(2*2)+(0)+(2*1)+(2*1)+(2*1)+(2*1)+(2*1)+(2*1) = 20. Normalized: round((20/30)*10) = 7
+    const score = computeHealthScore(results, { healthyMin: 8, degradedMin: 4 });
+    expect(score.total).toBe(7);
     expect(score.band).toBe("degraded");
   });
 });

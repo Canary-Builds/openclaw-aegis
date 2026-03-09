@@ -5,7 +5,7 @@ For the interactive scrollable timeline, open [roadmap.html](roadmap.html) in yo
 ## Timeline Overview
 
 ### Phase 1: Foundation (v1.0-v1.2) — Shipped
-- 10 health probes (process, port, HTTP, config, WebSocket, TUN, memory, CPU, disk, log tail)
+- 11 health probes (process, port, HTTP, config, WebSocket, TUN, memory, CPU, disk, log tail, channels)
 - L1/L2/L3/L4 recovery cascade with anti-flap and circuit breaker
 - 8 alert providers (ntfy, Telegram, WhatsApp, Slack, Discord, Email, Pushover, webhook)
 - Config guardian with dead man's switch and two-tier backup

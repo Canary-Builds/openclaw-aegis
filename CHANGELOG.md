@@ -2,6 +2,16 @@
 
 All notable changes to OpenClaw Aegis are documented here.
 
+## [1.5.1] - 2026-03-09
+
+### Added
+
+- **Channel readiness probe** — 11th health probe that checks all configured messaging channels (WhatsApp, Telegram, etc.) are actually connected and ready to deliver messages via `openclaw channels status --json`
+  - Score 2: all channels ready
+  - Score 1: some channels degraded (running but not connected)
+  - Score 0: no channels running or command failed
+- Detects WhatsApp Web listener disconnections, Telegram bot failures, and startup gaps where channels aren't ready yet
+
 ## [1.5.0] - 2026-03-09
 
 ### Added

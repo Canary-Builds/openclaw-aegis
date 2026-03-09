@@ -23,7 +23,7 @@ It stands between your gateway and disaster — a tireless sentinel that detects
 
 | | |
 |---|---|
-| **Detects** | 10 health probes scan process, port, HTTP, config, WebSocket, TUN, memory, CPU, disk, and logs every 10 seconds |
+| **Detects** | 11 health probes scan process, port, HTTP, config, WebSocket, TUN, memory, CPU, disk, logs, and channel readiness every 10 seconds |
 | **Diagnoses** | 6 failure pattern matchers identify poison configs, stale PIDs, port conflicts, permission errors, corruption, and OOM kills |
 | **Heals** | L1 restart, L2 targeted repair, L3 deep repair (network, dependencies, safe mode, disk), config rollback — all automatic |
 | **Alerts** | 8 out-of-band providers (ntfy, Telegram, WhatsApp, Slack, Discord, Email, Pushover, webhook) that work even when the gateway is dead |
@@ -65,7 +65,7 @@ Your gateway is now protected.
 |---------|-------------|
 | `aegis init` | Interactive setup — walks you through everything |
 | `aegis init --auto` | Zero-config setup — detects gateway, sets defaults |
-| `aegis check` | Run all 10 probes, get a health verdict |
+| `aegis check` | Run all 11 probes, get a health verdict |
 | `aegis check --json` | Machine-readable output for scripts and monitoring |
 | `aegis status` | Live dashboard — every probe, color-coded |
 | `aegis test-alert` | Fire a test alert to all configured channels |
@@ -80,7 +80,7 @@ Your gateway is now protected.
 ```
 OpenClaw Gateway                  Aegis Sidecar
 ┌─────────────────────┐          ┌──────────────────────────────┐
-│                     │          │  Health Monitor (10 probes)  │
+│                     │          │  Health Monitor (11 probes)  │
 │  ~/.openclaw/       │◄────────►│  Config Guardian             │
 │    openclaw.json    │          │  Dead Man's Switch           │
 │    logs/            │          │  Recovery Orchestrator        │

@@ -28,7 +28,7 @@ Auto-detecting configuration...
   PID source: openclaw-gateway.service (systemd)    # or ai.openclaw.gateway (launchd) on macOS
   Memory threshold: 768MB
 Config written to ~/.openclaw/aegis/config.toml
-Health: HEALTHY (10/10 probes passed)
+Health: HEALTHY (11/11 probes passed)
 
 Setup complete.
 ```
@@ -39,7 +39,7 @@ If a config already exists, interactive mode asks before overwriting. Auto mode 
 
 ## `aegis check`
 
-Runs all 10 health probes once and exits. Returns exit code 0 for healthy, 1 otherwise.
+Runs all 11 health probes once and exits. Returns exit code 0 for healthy, 1 otherwise.
 
 ```bash
 aegis check [--config <path>] [--json]

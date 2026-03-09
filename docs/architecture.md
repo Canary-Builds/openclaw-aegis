@@ -35,20 +35,20 @@ Aegis is a sidecar process that runs alongside your OpenClaw gateway. It continu
 
 ## Health Monitor
 
-The monitor runs all 10 probes on a configurable interval (default: 10 seconds). Each probe returns a health score (0 = failed, 1 = degraded, 2 = healthy) weighted by importance.
+The monitor runs all 11 probes on a configurable interval (default: 10 seconds). Each probe returns a health score (0 = failed, 1 = degraded, 2 = healthy) weighted by importance.
 
 ### Probe Pipeline
 
 ```
 Every 10s:
-  Run all 10 probes in parallel (with per-probe timeout)
+  Run all 11 probes in parallel (with per-probe timeout)
     → Compute aggregate health score
     → Classify: HEALTHY / DEGRADED / CRITICAL
     → If DEGRADED for N consecutive checks → escalate
     → If CRITICAL → escalate immediately
 ```
 
-### Ten Health Probes
+### Eleven Health Probes
 
 | Probe | Weight | What It Checks | Failure Indicates |
 |-------|--------|----------------|-------------------|
@@ -62,10 +62,11 @@ Every 10s:
 | **cpu** | 1 | CPU % below threshold (via `/proc` on Linux, `ps` on macOS) | Infinite loop, runaway |
 | **disk** | 1 | Sufficient space on config partition | Disk full |
 | **logTail** | 1 | Recent error patterns in gateway logs | Emerging issues |
+| **channels** | 1 | All messaging channels connected and ready | WhatsApp/Telegram disconnected, startup gap |
 
 ### Health Scoring
 
-- **Max score**: 20 (all probes at weight × 2)
+- **Max score**: 22 (all probes at weight × 2)
 - **Healthy**: score >= 7 (configurable)
 - **Degraded**: score >= 4 (configurable)
 - **Critical**: score < 4

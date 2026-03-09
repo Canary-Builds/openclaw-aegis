@@ -12,6 +12,7 @@ import { cpuProbe } from "./probes/cpu.js";
 import { diskProbe } from "./probes/disk.js";
 import { logTailProbe } from "./probes/log-tail.js";
 import { websocketProbe } from "./probes/websocket.js";
+import { channelsProbe } from "./probes/channels.js";
 
 export class HealthMonitor extends EventEmitter {
   private interval: NodeJS.Timeout | null = null;
@@ -91,6 +92,7 @@ export class HealthMonitor extends EventEmitter {
       ),
       withTimeout(() => logTailProbe(target, this.config.gateway.logPath), "logTail"),
       withTimeout(() => websocketProbe(target, this.config.gateway.port, timeout), "websocket"),
+      withTimeout(() => channelsProbe(target, timeout), "channels"),
     ]);
 
     const probeResults: HealthProbeResult[] = results.map((r, i) => {
@@ -106,6 +108,7 @@ export class HealthMonitor extends EventEmitter {
         "disk",
         "logTail",
         "websocket",
+        "channels",
       ] as const;
       return {
         name: names[i] ?? "unknown",

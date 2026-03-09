@@ -66,6 +66,7 @@ openclaw-aegis/
         cpu.ts              # CPU percentage
         disk.ts             # Free disk space
         log-tail.ts         # Error pattern scanning
+        channels.ts         # Channel readiness (WhatsApp/Telegram connected)
         resolve-pid.ts      # Shared PID resolution (launchd + systemd + file)
     recovery/
       orchestrator.ts       # L1/L2/L3/L4 recovery cascade

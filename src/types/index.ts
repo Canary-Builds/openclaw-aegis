@@ -111,6 +111,7 @@ export const PROBE_WEIGHTS: Record<string, number> = {
   cpu: 1,
   disk: 1,
   logTail: 1,
+  channels: 1,
 };
 
 export const MAX_HEALTH_SCORE = Object.values(PROBE_WEIGHTS).reduce((a, b) => a + b, 0) * 2;
