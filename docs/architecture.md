@@ -300,6 +300,17 @@ The anomaly detector learns what's normal from your health history and flags dev
 
 Uses statistical analysis (mean + standard deviation) with configurable thresholds. Requires consecutive confirmations (default: 3) before alerting to avoid false positives. Feeds from the existing health history time-series.
 
+### Predictive Alerts
+
+Trend analysis engine that projects when thresholds will be breached:
+
+- **Memory exhaustion**: projects when memory probe will reach critical
+- **Disk full**: projects disk fill rate and time to zero free space
+- **Score degradation**: predicts when health score will drop below HEALTHY
+- **Latency breach**: forecasts when probe latency will exceed timeout
+
+Uses linear regression with R² confidence scoring. Only alerts when predictions fall within a configurable warning horizon (default: 1 hour). Runs every 10th health check to minimize CPU overhead.
+
 ## Platform Adapters
 
 ### systemd (Linux)

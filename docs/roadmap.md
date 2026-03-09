@@ -37,10 +37,12 @@ For the interactive scrollable timeline, open [roadmap.html](roadmap.html) in yo
 - Confirmation counting to prevent false positives
 - Alert cooldown to prevent spam
 
-### Phase 5b: Predictive Alerts (v1.7) — Planned
-- Memory leak trajectory projection
+### Phase 5b: Predictive Alerts (v1.7) — Shipped
+- Memory exhaustion trajectory projection
 - Disk fill rate prediction
-- Trend extrapolation from health history
+- Score degradation trend detection
+- Latency breach forecasting for critical probes
+- Linear regression with R² confidence
 
 ### Phase 5c: Root Cause Analysis (v1.8) — Planned
 - Correlate probes + logs + events

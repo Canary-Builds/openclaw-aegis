@@ -20,6 +20,7 @@ import { HealthHistory } from "../observability/health-history.js";
 import { SlaTracker } from "../observability/sla.js";
 import { RecoveryTracer } from "../observability/tracing.js";
 import { AnomalyDetector } from "../intelligence/anomaly.js";
+import { PredictiveAlerter } from "../intelligence/predictive.js";
 
 export class AegisDaemon {
   private readonly config: AegisConfig;
@@ -38,7 +39,9 @@ export class AegisDaemon {
   private readonly slaTracker: SlaTracker;
   private readonly tracer: RecoveryTracer;
   private readonly anomalyDetector: AnomalyDetector;
+  private readonly predictiveAlerter: PredictiveAlerter;
   private knownGoodTimer: NodeJS.Timeout | null = null;
+  private predictiveCheckCount = 0;
   private running = false;
   private readonly startedAt = Date.now();
 
@@ -92,6 +95,22 @@ export class AegisDaemon {
         latencyDeviationThreshold: intel.anomaly.latencyDeviationThreshold,
         confirmationCount: intel.anomaly.confirmationCount,
         alertCooldownMs: intel.anomaly.alertCooldownMs,
+      } : undefined,
+    );
+
+    this.predictiveAlerter = new PredictiveAlerter(
+      this.healthHistory,
+      {
+        memoryMb: config.health.memoryThresholdMb,
+        diskMb: config.health.diskThresholdMb,
+        healthyMin: config.health.healthyMin,
+      },
+      this.alertDispatcher,
+      intel.predictive.enabled ? {
+        minDataPoints: intel.predictive.minDataPoints,
+        trendWindowMs: intel.predictive.trendWindowMs,
+        warningHorizonMs: intel.predictive.warningHorizonMs,
+        alertCooldownMs: intel.predictive.alertCooldownMs,
       } : undefined,
     );
 
@@ -191,6 +210,10 @@ export class AegisDaemon {
     return this.anomalyDetector;
   }
 
+  getPredictiveAlerter(): PredictiveAlerter {
+    return this.predictiveAlerter;
+  }
+
   private setupAlertProviders(): void {
     for (const channel of this.config.alerts.channels) {
       switch (channel.type) {
@@ -258,6 +281,18 @@ export class AegisDaemon {
           this.logger.warn("intelligence", "anomalies_detected", {
             count: anomalies.length,
             types: anomalies.map((a) => a.type),
+          });
+        }
+      }
+
+      // Run predictive analysis (every 10th check to save CPU)
+      this.predictiveCheckCount = (this.predictiveCheckCount ?? 0) + 1;
+      if (this.config.intelligence.predictive.enabled && this.predictiveCheckCount % 10 === 0) {
+        const predictions = this.predictiveAlerter.analyze();
+        if (predictions.length > 0) {
+          this.logger.warn("intelligence", "predictions_generated", {
+            count: predictions.length,
+            types: predictions.map((p) => p.type),
           });
         }
       }

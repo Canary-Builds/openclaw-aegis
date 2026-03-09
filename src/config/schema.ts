@@ -171,6 +171,15 @@ export const aegisConfigSchema = z.object({
           alertCooldownMs: z.number().int().min(60000).default(900000),
         })
         .default({}),
+      predictive: z
+        .object({
+          enabled: z.boolean().default(true),
+          minDataPoints: z.number().int().min(10).default(120),
+          trendWindowMs: z.number().int().min(60000).default(7200000),
+          warningHorizonMs: z.number().int().min(60000).default(3600000),
+          alertCooldownMs: z.number().int().min(60000).default(1800000),
+        })
+        .default({}),
     })
     .default({}),
 

@@ -2,6 +2,22 @@
 
 All notable changes to OpenClaw Aegis are documented here.
 
+## [1.7.0] - 2026-03-11
+
+### Added
+
+- **Predictive alerts** — trend analysis engine that projects when thresholds will be breached
+  - Memory exhaustion: projects when memory probe score will reach critical based on declining trend
+  - Disk full: projects when disk probe score will hit zero based on fill rate
+  - Score degradation: projects when aggregate health score will drop below HEALTHY threshold
+  - Latency breach: projects when probe latency will exceed timeout for HTTP, port, WebSocket probes
+  - Linear regression with R² confidence scoring
+  - Configurable warning horizon (default: 1h), runs every 10th health check to save CPU
+- New config section: `[intelligence.predictive]` with 5 tunable parameters
+- 1 new API endpoint:
+  - `GET /predictions` — current predictions with estimated time-to-threshold
+- Total API endpoints: 29 (was 28)
+
 ## [1.6.0] - 2026-03-10
 
 ### Added
