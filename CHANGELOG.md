@@ -2,6 +2,19 @@
 
 All notable changes to OpenClaw Aegis are documented here.
 
+## [1.11.0] - 2026-03-15
+
+### Added
+
+- **Zero-touch auto-install** — `npm install -g openclaw-aegis` now does everything automatically
+  - Auto-generates config via `aegis init --auto` if `~/.openclaw/aegis/config.toml` is missing
+  - Creates and enables systemd user service on Linux (`~/.config/systemd/user/openclaw-aegis.service`)
+  - Creates and loads launchd plist on macOS (`~/Library/LaunchAgents/com.openclaw.aegis.plist`)
+  - Enables `loginctl enable-linger` so the service persists after logout (Linux)
+  - Skips automatically in CI environments (`CI` or `AEGIS_SKIP_POSTINSTALL` env vars)
+  - Graceful fallback: warns but doesn't crash the install if any step fails
+- New file: `scripts/postinstall.js` — npm postinstall hook for automatic service setup
+
 ## [1.10.0] - 2026-03-14
 
 ### Added
