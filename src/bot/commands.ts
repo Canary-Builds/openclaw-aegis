@@ -24,7 +24,7 @@ export interface CommandResult {
   markdown?: string;
 }
 
-type CommandFn = () => Promise<CommandResult> | CommandResult;
+type CommandFn = (args: string) => Promise<CommandResult> | CommandResult;
 
 export class BotCommandHandler {
   private readonly commands: Map<string, { description: string; handler: CommandFn }> = new Map();
@@ -38,6 +38,7 @@ export class BotCommandHandler {
     this.register("alerts", "Alert channel status", this.cmdAlerts.bind(this));
     this.register("version", "Version, uptime, platform", this.cmdVersion.bind(this));
     this.register("help", "List available commands", this.cmdHelp.bind(this));
+    this.register("repair", "Attempt L3 deep repair (requires confirmation)", this.cmdRepair.bind(this));
   }
 
   private register(name: string, description: string, handler: CommandFn): void {
@@ -45,10 +46,12 @@ export class BotCommandHandler {
   }
 
   async handle(input: string): Promise<CommandResult | null> {
-    const cmd = input.trim().toLowerCase().replace(/^\//, "");
+    const parts = input.trim().replace(/^\//, "").split(/\s+/);
+    const cmd = (parts[0] ?? "").toLowerCase();
+    const args = parts.slice(1).join(" ");
     const entry = this.commands.get(cmd);
     if (!entry) return null;
-    return entry.handler();
+    return entry.handler(args);
   }
 
   getCommandList(): { name: string; description: string }[] {
@@ -60,7 +63,7 @@ export class BotCommandHandler {
 
   // --- Commands ---
 
-  private async cmdHealth(): Promise<CommandResult> {
+  private async cmdHealth(_args: string): Promise<CommandResult> {
     const score = this.deps.monitor.getLastScore() ?? (await this.deps.monitor.runAllProbes());
     const passed = score.probeResults.filter((p) => p.healthy).length;
     const failed = score.probeResults.filter((p) => !p.healthy);
@@ -81,7 +84,7 @@ export class BotCommandHandler {
     return { text };
   }
 
-  private async cmdStatus(): Promise<CommandResult> {
+  private async cmdStatus(_args: string): Promise<CommandResult> {
     const score = this.deps.monitor.getLastScore() ?? (await this.deps.monitor.runAllProbes());
     const icon =
       score.band === "healthy"
@@ -99,7 +102,7 @@ export class BotCommandHandler {
     return { text };
   }
 
-  private cmdIncidents(): CommandResult {
+  private cmdIncidents(_args: string): CommandResult {
     if (!this.deps.incidents) {
       return { text: "No incident logger available." };
     }
@@ -133,7 +136,7 @@ export class BotCommandHandler {
     return { text };
   }
 
-  private cmdRecovery(): CommandResult {
+  private cmdRecovery(_args: string): CommandResult {
     if (!this.deps.recovery) {
       return { text: "Recovery: idle (orchestrator not active)" };
     }
@@ -156,7 +159,7 @@ export class BotCommandHandler {
     return { text };
   }
 
-  private cmdBackups(): CommandResult {
+  private cmdBackups(_args: string): CommandResult {
     if (!this.deps.backup) {
       return { text: "Backup manager not available." };
     }
@@ -176,7 +179,7 @@ export class BotCommandHandler {
     return { text };
   }
 
-  private cmdAlerts(): CommandResult {
+  private cmdAlerts(_args: string): CommandResult {
     const channels = this.deps.config.alerts.channels;
     if (channels.length === 0) {
       return { text: "No alert channels configured. Run 'aegis init' to add one." };
@@ -189,7 +192,7 @@ export class BotCommandHandler {
     return { text };
   }
 
-  private cmdVersion(): CommandResult {
+  private cmdVersion(_args: string): CommandResult {
     const uptimeMs = Date.now() - this.deps.startedAt;
     const hours = Math.floor(uptimeMs / 3600000);
     const minutes = Math.floor((uptimeMs % 3600000) / 60000);
@@ -202,11 +205,56 @@ export class BotCommandHandler {
     return { text };
   }
 
-  private cmdHelp(): CommandResult {
+  private cmdHelp(_args: string): CommandResult {
     let text = "Aegis Bot Commands:\n";
     for (const [name, { description }] of this.commands) {
       text += `\n  /${name} \u2014 ${description}`;
     }
+    return { text };
+  }
+
+  private async cmdRepair(args: string): Promise<CommandResult> {
+    if (!this.deps.recovery) {
+      return { text: "Recovery orchestrator not available." };
+    }
+
+    if (args.trim().toLowerCase() !== "confirm") {
+      let text = "\u26A0\uFE0F L3 DEEP REPAIR \u2014 DESTRUCTIVE OPERATION\n";
+      text += "\nThis will attempt the following repairs on your server:\n";
+      text += "\n  1. Network repair \u2014 flush DNS cache, reset TUN interface, check default routes";
+      text += "\n  2. Process resurrection \u2014 reinstall gateway binary via npm install -g openclaw";
+      text += "\n  3. Dependency rebuild \u2014 delete and rebuild node_modules with npm install --production";
+      text += "\n  4. Safe mode boot \u2014 start gateway with minimal config (no plugins, default routes)";
+      text += "\n  5. Disk cleanup \u2014 truncate oversized logs, delete rotated logs, clear temp files";
+      text += "\n\n\u{1F6A8} These actions CAN affect other services on this server.";
+      text += "\nOnly proceed if normal recovery (L1 restart + L2 targeted repair) has failed.\n";
+      text += "\nTo proceed, send: /repair confirm";
+      return { text };
+    }
+
+    // User confirmed — run L3
+    let text = "\u{1F527} Running L3 deep repair...\n";
+
+    try {
+      const result = await this.deps.recovery.triggerL3();
+
+      if (result.actions.length === 0) {
+        text += "\nNo matching failure patterns detected \u2014 nothing to repair.";
+        return { text };
+      }
+
+      for (const action of result.actions) {
+        const mark = action.result === "success" ? "\u2705" : "\u274C";
+        text += `\n  ${mark} ${action.action} (${action.level}, ${action.durationMs}ms)`;
+      }
+
+      text += result.success
+        ? "\n\n\u2705 L3 repair succeeded. Gateway should recover shortly."
+        : "\n\n\u274C L3 repair did not resolve the issue. Manual intervention required.";
+    } catch {
+      text += "\n\u274C L3 repair failed with an unexpected error. Check logs for details.";
+    }
+
     return { text };
   }
 }

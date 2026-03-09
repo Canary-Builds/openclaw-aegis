@@ -55,6 +55,14 @@ export class RecoveryOrchestrator extends EventEmitter {
     return this.circuitBreaker;
   }
 
+  /**
+   * Public entry point for on-demand L3 deep repair (e.g. from /repair bot command).
+   * Runs L3 patterns regardless of l3Enabled config — caller is responsible for confirmation.
+   */
+  async triggerL3(): Promise<{ success: boolean; actions: RecoveryAction[] }> {
+    return this.attemptL3();
+  }
+
   async recover(_healthScore: HealthScore): Promise<RecoveryAction[]> {
     if (this.recovering) return [];
     this.recovering = true;

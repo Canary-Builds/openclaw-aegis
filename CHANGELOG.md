@@ -2,6 +2,16 @@
 
 All notable changes to OpenClaw Aegis are documented here.
 
+## [1.5.3] - 2026-03-09
+
+### Added
+
+- **Interactive `/repair` bot command** — two-step confirmation flow for on-demand L3 deep repair
+  - `/repair` shows a warning listing all 5 destructive L3 strategies and their impact
+  - `/repair confirm` executes L3 deep repair and returns per-action results
+  - Works even when `l3Enabled = false` in config — gives users manual control when automated L3 is disabled
+- New public `triggerL3()` method on `RecoveryOrchestrator` for programmatic L3 invocation
+
 ## [1.5.2] - 2026-03-09
 
 ### Changed

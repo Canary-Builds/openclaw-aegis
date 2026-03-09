@@ -99,7 +99,7 @@ openclaw-aegis/
     api/
       server.ts             # REST API server (26 endpoints)
     bot/
-      commands.ts           # Shared command handler (8 commands)
+      commands.ts           # Shared command handler (9 commands)
       telegram.ts           # Telegram long polling listener
       whatsapp.ts           # WhatsApp webhook listener
       slack.ts              # Slack slash command listener

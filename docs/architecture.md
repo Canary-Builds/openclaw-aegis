@@ -286,7 +286,7 @@ Four platforms support two-way messaging — users send a command, Aegis replies
 
 Push-only providers (ntfy, Email, Pushover, Webhook) remain alert-only.
 
-8 commands: `/health`, `/status`, `/incidents`, `/recovery`, `/backups`, `/alerts`, `/version`, `/help`
+9 commands: `/health`, `/status`, `/incidents`, `/recovery`, `/backups`, `/alerts`, `/version`, `/help`, `/repair`
 
 ## Platform Adapters
 
