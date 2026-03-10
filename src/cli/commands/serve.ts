@@ -8,6 +8,11 @@ import { AlertDispatcher } from "../../alerts/dispatcher.js";
 import { DeadManSwitch } from "../../config-guardian/dead-man-switch.js";
 import { RecoveryOrchestrator } from "../../recovery/orchestrator.js";
 import { DiagnosisEngine } from "../../diagnosis/engine.js";
+import { AnomalyDetector } from "../../intelligence/anomaly.js";
+import { PredictiveAlerter } from "../../intelligence/predictive.js";
+import { RootCauseAnalyzer } from "../../intelligence/rca.js";
+import { RunbookEngine } from "../../intelligence/runbooks.js";
+import { AlertNoiseReducer } from "../../intelligence/noise-reduction.js";
 import { TelegramBotListener } from "../../bot/telegram.js";
 import { WhatsAppBotListener } from "../../bot/whatsapp.js";
 import { SlackBotListener } from "../../bot/slack.js";
@@ -41,6 +46,36 @@ export const serveCommand = new Command("serve")
     const diagnosisEngine = new DiagnosisEngine(backupManager);
     const recovery = new RecoveryOrchestrator(config, diagnosisEngine, backupManager);
 
+    // Intelligence modules
+    const intel = config.intelligence;
+    const anomalyDetector = new AnomalyDetector(monitor, {
+      minBaseline: intel.anomaly.minBaseline,
+      baselineWindowMs: intel.anomaly.baselineWindowMs,
+      scoreDeviationThreshold: intel.anomaly.scoreDeviationThreshold,
+      latencyDeviationThreshold: intel.anomaly.latencyDeviationThreshold,
+      confirmationCount: intel.anomaly.confirmationCount,
+      alertCooldownMs: intel.anomaly.alertCooldownMs,
+    });
+    const predictiveAlerter = new PredictiveAlerter(monitor, {
+      minDataPoints: intel.predictive.minDataPoints,
+      trendWindowMs: intel.predictive.trendWindowMs,
+      warningHorizonMs: intel.predictive.warningHorizonMs,
+      alertCooldownMs: intel.predictive.alertCooldownMs,
+    });
+    const rootCauseAnalyzer = new RootCauseAnalyzer(monitor);
+    const runbookEngine = intel.runbooks.enabled
+      ? new RunbookEngine(expandHome(intel.runbooks.basePath))
+      : undefined;
+    const noiseReducer = intel.noiseReduction.enabled
+      ? new AlertNoiseReducer(alertDispatcher, {
+          groupingWindowMs: intel.noiseReduction.groupingWindowMs,
+          dedupThreshold: intel.noiseReduction.dedupThreshold,
+          escalationDelayMs: intel.noiseReduction.escalationDelayMs,
+          maxBufferSize: intel.noiseReduction.maxBufferSize,
+          digestIntervalMs: intel.noiseReduction.digestIntervalMs,
+        })
+      : undefined;
+
     const api = new AegisApiServer({
       config,
       monitor,
@@ -49,6 +84,11 @@ export const serveCommand = new Command("serve")
       incidents: incidentLogger,
       alerts: alertDispatcher,
       deadManSwitch,
+      anomalyDetector,
+      predictiveAlerter,
+      rootCauseAnalyzer,
+      runbookEngine,
+      noiseReducer,
     });
 
     // Start health monitoring in background
