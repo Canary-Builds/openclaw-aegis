@@ -199,6 +199,13 @@ export const aegisConfigSchema = z.object({
     })
     .default({}),
 
+  maintenance: z
+    .object({
+      enabled: z.boolean().default(false),
+      maxDurationMs: z.number().int().min(60000).default(14400000),
+    })
+    .default({}),
+
   api: z
     .object({
       enabled: z.boolean().default(false),

@@ -2,6 +2,20 @@
 
 All notable changes to OpenClaw Aegis are documented here.
 
+## [1.12.0] - 2026-03-11
+
+### Added
+
+- **Maintenance windows** — scheduled alert and recovery suppression during planned downtime
+  - `MaintenanceWindow` class with activate/deactivate/auto-expiry and fail-open design
+  - `[maintenance]` config section with `maxDurationMs` safety cap (default: 4 hours)
+  - REST API: `GET /maintenance`, `POST /maintenance/activate`, `POST /maintenance/deactivate`
+  - CLI: `aegis maintenance on [duration]`, `aegis maintenance off`, `aegis maintenance status`
+  - Health probes continue running during maintenance; only alerts and recovery are suppressed
+  - Auto-expiry timer with periodic warnings every 15 minutes
+  - Startup log message confirms no active maintenance window
+  - Incident logging for MAINTENANCE_ACTIVATED, MAINTENANCE_DEACTIVATED, ESCALATION_SUPPRESSED events
+
 ## [1.11.0] - 2026-03-15
 
 ### Added

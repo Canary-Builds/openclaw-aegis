@@ -18,6 +18,7 @@ import { WhatsAppBotListener } from "../../bot/whatsapp.js";
 import { SlackBotListener } from "../../bot/slack.js";
 import { DiscordBotListener } from "../../bot/discord.js";
 import type { BotDeps } from "../../bot/commands.js";
+import { MaintenanceWindow } from "../../maintenance/windows.js";
 
 export const serveCommand = new Command("serve")
   .description("Start the Aegis API server and bot listeners")
@@ -76,6 +77,10 @@ export const serveCommand = new Command("serve")
         })
       : undefined;
 
+    const maintenanceWindow = config.maintenance.enabled
+      ? new MaintenanceWindow({ maxDurationMs: config.maintenance.maxDurationMs })
+      : undefined;
+
     const api = new AegisApiServer({
       config,
       monitor,
@@ -89,6 +94,7 @@ export const serveCommand = new Command("serve")
       rootCauseAnalyzer,
       runbookEngine,
       noiseReducer,
+      maintenanceWindow,
     });
 
     // Start health monitoring in background

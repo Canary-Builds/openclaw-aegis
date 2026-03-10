@@ -7,6 +7,7 @@ import { initCommand } from "./commands/init.js";
 import { testAlertCommand } from "./commands/test-alert.js";
 import { incidentsCommand } from "./commands/incidents.js";
 import { serveCommand } from "./commands/serve.js";
+import { maintenanceCommand } from "./commands/maintenance.js";
 
 function getVersion(): string {
   try {
@@ -32,5 +33,6 @@ program.addCommand(checkCommand);
 program.addCommand(testAlertCommand);
 program.addCommand(incidentsCommand);
 program.addCommand(serveCommand);
+program.addCommand(maintenanceCommand);
 
 program.parse(process.argv);

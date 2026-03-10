@@ -24,6 +24,7 @@ import { PredictiveAlerter } from "../intelligence/predictive.js";
 import { RootCauseAnalyzer } from "../intelligence/rca.js";
 import { RunbookEngine } from "../intelligence/runbooks.js";
 import { AlertNoiseReducer } from "../intelligence/noise-reduction.js";
+import { MaintenanceWindow } from "../maintenance/windows.js";
 
 export class AegisDaemon {
   private readonly config: AegisConfig;
@@ -46,6 +47,7 @@ export class AegisDaemon {
   private readonly rootCauseAnalyzer: RootCauseAnalyzer;
   private readonly runbookEngine?: RunbookEngine;
   private readonly noiseReducer?: AlertNoiseReducer;
+  private readonly maintenanceWindow: MaintenanceWindow;
   private knownGoodTimer: NodeJS.Timeout | null = null;
   private predictiveCheckCount = 0;
   private running = false;
@@ -134,6 +136,10 @@ export class AegisDaemon {
       });
     }
 
+    this.maintenanceWindow = new MaintenanceWindow({
+      maxDurationMs: config.maintenance.maxDurationMs,
+    });
+
     this.metrics = new MetricsCollector({
       monitor: this.monitor,
       recovery: this.orchestrator,
@@ -157,6 +163,8 @@ export class AegisDaemon {
       });
     }
 
+    this.logger.info("maintenance", "no_active_window");
+
     this.configDetector.start();
     this.monitor.start();
     this.platformAdapter.startWatchdogHeartbeat();
@@ -168,6 +176,7 @@ export class AegisDaemon {
   stop(): void {
     this.running = false;
     this.noiseReducer?.stop();
+    this.maintenanceWindow.destroy();
     this.monitor.stop();
     this.configDetector.stop();
     this.deadManSwitch.destroy();
@@ -248,6 +257,10 @@ export class AegisDaemon {
     return this.noiseReducer;
   }
 
+  getMaintenanceWindow(): MaintenanceWindow {
+    return this.maintenanceWindow;
+  }
+
   private setupAlertProviders(): void {
     for (const channel of this.config.alerts.channels) {
       switch (channel.type) {
@@ -288,6 +301,19 @@ export class AegisDaemon {
     });
 
     this.monitor.on("escalate", (score: HealthScore) => {
+      if (this.maintenanceWindow.isActive()) {
+        this.logger.info("maintenance", "escalation_suppressed", {
+          reason: "maintenance",
+          score: score.total,
+          band: score.band,
+        });
+        this.incidentLogger.log("ESCALATION_SUPPRESSED", {
+          reason: "maintenance",
+          score: score.total,
+          band: score.band,
+        });
+        return;
+      }
       this.logger.error("health", "escalation", {
         score: score.total,
         band: score.band,

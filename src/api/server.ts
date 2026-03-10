@@ -17,6 +17,7 @@ import type { PredictiveAlerter } from "../intelligence/predictive.js";
 import type { RootCauseAnalyzer } from "../intelligence/rca.js";
 import type { RunbookEngine } from "../intelligence/runbooks.js";
 import type { AlertNoiseReducer } from "../intelligence/noise-reduction.js";
+import type { MaintenanceWindow } from "../maintenance/windows.js";
 import { computeStatistics } from "../incidents/statistics.js";
 import type { AlertPayload } from "../types/index.js";
 
@@ -74,6 +75,7 @@ interface AegisApiDeps {
   rootCauseAnalyzer?: RootCauseAnalyzer;
   runbookEngine?: RunbookEngine;
   noiseReducer?: AlertNoiseReducer;
+  maintenanceWindow?: MaintenanceWindow;
 }
 
 export class AegisApiServer {
@@ -134,6 +136,11 @@ export class AegisApiServer {
     this.route("GET", "/sla/:period", this.handleSlaPeriod.bind(this));
     this.route("GET", "/traces", this.handleTraces.bind(this));
     this.route("GET", "/traces/:traceId", this.handleTraceById.bind(this));
+
+    // Maintenance
+    this.route("GET", "/maintenance", this.handleMaintenanceStatus.bind(this));
+    this.route("POST", "/maintenance/activate", this.handleMaintenanceActivate.bind(this));
+    this.route("POST", "/maintenance/deactivate", this.handleMaintenanceDeactivate.bind(this));
 
     // Intelligence (Phase 5)
     this.route("GET", "/anomalies", this.handleAnomalies.bind(this));
@@ -797,6 +804,56 @@ export class AegisApiServer {
         count: predictions.length,
       },
     };
+  }
+
+  // --- Maintenance ---
+
+  private handleMaintenanceStatus(): RouteResponse {
+    if (!this.deps.maintenanceWindow) {
+      return { status: 200, body: { active: false, activatedAt: null, expiresAt: null, activatedBy: null, remainingMs: null } };
+    }
+    return { status: 200, body: this.deps.maintenanceWindow.getStatus() };
+  }
+
+  private handleMaintenanceActivate(_params: Record<string, string>, req: http.IncomingMessage): Promise<RouteResponse> {
+    return new Promise((resolve) => {
+      if (!this.deps.maintenanceWindow) {
+        resolve({ status: 400, body: { error: "Maintenance windows not configured" } });
+        return;
+      }
+      let data = "";
+      req.on("data", (chunk: Buffer) => { data += chunk.toString(); });
+      req.on("end", () => {
+        try {
+          const body = (data ? JSON.parse(data) : {}) as Record<string, unknown>;
+          const durationMs = typeof body["durationMs"] === "number" ? body["durationMs"] : 0;
+          const activatedBy = typeof body["activatedBy"] === "string" ? body["activatedBy"] : "api";
+          const status = this.deps.maintenanceWindow!.activate(durationMs, activatedBy);
+          if (this.deps.incidents) {
+            this.deps.incidents.log("MAINTENANCE_ACTIVATED", {
+              durationMs,
+              activatedBy,
+              expiresAt: status.expiresAt,
+            });
+          }
+          resolve({ status: 200, body: status });
+        } catch (err) {
+          resolve({ status: 400, body: { error: err instanceof Error ? err.message : String(err) } });
+        }
+      });
+    });
+  }
+
+  private handleMaintenanceDeactivate(): RouteResponse {
+    if (!this.deps.maintenanceWindow) {
+      return { status: 200, body: { active: false, activatedAt: null, expiresAt: null, activatedBy: null, remainingMs: null } };
+    }
+    const wasActive = this.deps.maintenanceWindow.isActive();
+    const status = this.deps.maintenanceWindow.deactivate();
+    if (wasActive && this.deps.incidents) {
+      this.deps.incidents.log("MAINTENANCE_DEACTIVATED", {});
+    }
+    return { status: 200, body: status };
   }
 
   // --- Server lifecycle ---
