@@ -38,8 +38,9 @@ export function preflightValidation(configPath: string): PreflightResult {
     return { valid: false, errors: ["Config is not valid JSON"] };
   }
 
-  if (!("port" in parsed)) {
-    errors.push("Missing required key: port");
+  const gateway = parsed.gateway as Record<string, unknown> | undefined;
+  if (!("port" in parsed) && !(gateway && "port" in gateway)) {
+    errors.push("Missing required key: port (checked top-level and gateway.port)");
   }
 
   const poisonKeys = ["autoAck", "autoAckMessage"];

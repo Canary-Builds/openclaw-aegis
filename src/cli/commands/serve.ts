@@ -5,6 +5,14 @@ import { AegisApiServer } from "../../api/server.js";
 import { BackupManager } from "../../backup/manager.js";
 import { IncidentLogger } from "../../incidents/logger.js";
 import { AlertDispatcher } from "../../alerts/dispatcher.js";
+import { NtfyProvider } from "../../alerts/providers/ntfy.js";
+import { TelegramProvider } from "../../alerts/providers/telegram.js";
+import { WhatsAppProvider } from "../../alerts/providers/whatsapp.js";
+import { WebhookProvider } from "../../alerts/providers/webhook.js";
+import { SlackProvider } from "../../alerts/providers/slack.js";
+import { DiscordProvider } from "../../alerts/providers/discord.js";
+import { EmailProvider } from "../../alerts/providers/email.js";
+import { PushoverProvider } from "../../alerts/providers/pushover.js";
 import { DeadManSwitch } from "../../config-guardian/dead-man-switch.js";
 import { RecoveryOrchestrator } from "../../recovery/orchestrator.js";
 import { DiagnosisEngine } from "../../diagnosis/engine.js";
@@ -18,6 +26,7 @@ import { WhatsAppBotListener } from "../../bot/whatsapp.js";
 import { SlackBotListener } from "../../bot/slack.js";
 import { DiscordBotListener } from "../../bot/discord.js";
 import type { BotDeps } from "../../bot/commands.js";
+import type { AlertPayload, HealthScore } from "../../types/index.js";
 import { MaintenanceWindow } from "../../maintenance/windows.js";
 
 export const serveCommand = new Command("serve")
@@ -46,6 +55,100 @@ export const serveCommand = new Command("serve")
     const deadManSwitch = new DeadManSwitch(config, backupManager);
     const diagnosisEngine = new DiagnosisEngine(backupManager);
     const recovery = new RecoveryOrchestrator(config, diagnosisEngine, backupManager);
+
+    // Register alert providers from config
+    for (const ch of config.alerts.channels) {
+      switch (ch.type) {
+        case "ntfy":
+          alertDispatcher.addProvider(new NtfyProvider(ch));
+          break;
+        case "telegram":
+          alertDispatcher.addProvider(new TelegramProvider(ch));
+          break;
+        case "whatsapp":
+          alertDispatcher.addProvider(new WhatsAppProvider(ch));
+          break;
+        case "webhook":
+          alertDispatcher.addProvider(new WebhookProvider(ch));
+          break;
+        case "slack":
+          alertDispatcher.addProvider(new SlackProvider(ch));
+          break;
+        case "discord":
+          alertDispatcher.addProvider(new DiscordProvider(ch));
+          break;
+        case "email":
+          alertDispatcher.addProvider(new EmailProvider(ch));
+          break;
+        case "pushover":
+          alertDispatcher.addProvider(new PushoverProvider(ch));
+          break;
+      }
+    }
+
+    // Wire monitor → recovery + alerts + incidents
+    let escalationActive = false;
+    monitor.on("escalate", async (score: HealthScore) => {
+      if (escalationActive) return;
+      escalationActive = true;
+      try {
+        const incidentId = incidentLogger.startIncident();
+        console.log(
+          `[aegis] ESCALATION: band=${score.band} score=${score.total} incident=${incidentId}`,
+        );
+        incidentLogger.log("escalation", {
+          score: score.total,
+          band: score.band,
+          probes: score.probeResults,
+        });
+
+        const alert: AlertPayload = {
+          severity: score.band === "critical" ? "critical" : "warning",
+          title: `Gateway ${score.band.toUpperCase()}: health score ${score.total}`,
+          body: `Aegis detected gateway health degradation.\nBand: ${score.band}\nScore: ${score.total}\nFailed probes: ${score.probeResults.filter((p) => !p.healthy).map((p) => p.name).join(", ") || "none"}`,
+          timestamp: new Date().toISOString(),
+          incidentId: incidentId ?? undefined,
+          healthScore: score,
+        };
+        void alertDispatcher.dispatch(alert);
+
+        const actions = await recovery.recover(score);
+        incidentLogger.log("recovery_result", { actions });
+
+        if (actions.some((a) => a.result === "success")) {
+          console.log(`[aegis] Recovery succeeded after ${actions.length} action(s)`);
+          incidentLogger.log("recovery_success", { actions });
+          incidentLogger.endIncident();
+        } else {
+          console.log(`[aegis] Recovery FAILED — all ${actions.length} action(s) exhausted`);
+          incidentLogger.log("recovery_failed", { actions });
+          const failAlert: AlertPayload = {
+            severity: "critical",
+            title: "Gateway recovery FAILED — manual intervention required",
+            body: `Aegis exhausted all recovery actions.\nActions attempted: ${actions.map((a) => `${a.level}/${a.action}=${a.result}`).join(", ")}`,
+            timestamp: new Date().toISOString(),
+            incidentId: incidentId ?? undefined,
+            recoveryActions: actions,
+          };
+          void alertDispatcher.dispatch(failAlert);
+        }
+      } catch (err) {
+        console.error(
+          `[aegis] Escalation handler error: ${err instanceof Error ? err.message : String(err)}`,
+        );
+        incidentLogger.log("escalation_error", {
+          error: err instanceof Error ? err.message : String(err),
+        });
+      } finally {
+        escalationActive = false;
+      }
+    });
+
+    // Wire recovery events for logging
+    recovery.on("recovery", (event: { type: string }) => {
+      console.log(`[aegis] Recovery event: ${event.type}`);
+      incidentLogger.log("recovery_event", event);
+    });
 
     // Intelligence modules
     const intel = config.intelligence;

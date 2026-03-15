@@ -170,7 +170,8 @@ function createPatterns(backupManager: BackupManager): FailurePattern[] {
         try {
           const raw = fs.readFileSync(ctx.configPath, "utf-8");
           const parsed = JSON.parse(raw) as Record<string, unknown>;
-          return !("port" in parsed);
+          const gw = parsed.gateway as Record<string, unknown> | undefined;
+          return !("port" in parsed) && !(gw && "port" in gw);
         } catch {
           return true;
         }

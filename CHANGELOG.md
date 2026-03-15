@@ -2,6 +2,17 @@
 
 All notable changes to OpenClaw Aegis are documented here.
 
+## [1.12.1] - 2026-03-15
+
+### Fixed
+
+- **Critical: wired monitor → recovery escalation chain in `serve` command** — `HealthMonitor` and `RecoveryOrchestrator` were both instantiated but never connected via event listeners. `monitor.on('escalate', ...)` was missing entirely, so health failures were detected but recovery never triggered. This was the root cause of the 17-minute undetected gateway outage on 2026-03-15.
+- **Critical: registered alert providers in `serve` command** — `AlertDispatcher` was created with zero providers. The provider registration loop (Telegram, Slack, Discord, etc.) only existed in `test-alert` command but was never added to `serve`. Alerts could never be sent even if triggered.
+- **Fixed preflight validation rejecting valid OpenClaw configs** — `preflightValidation()` required a top-level `port` key in `openclaw.json`, but OpenClaw stores port under `gateway.port`. Every L1 recovery attempt was blocked by a false "Missing required key: port" error. Now checks both `port` and `gateway.port`.
+- **Fixed same port check in diagnosis engine** — L2 `config-corrupted` pattern used the same incorrect top-level-only port check, causing false positive config corruption detection.
+- **Added incident lifecycle management** — escalation events now start incidents (`startIncident()`), log all recovery events, and close incidents on success (`endIncident()`).
+- **Added recovery event logging** — `recovery.on('recovery', ...)` now logs all L1/L2/L3/L4 events to incident timeline and journal.
+
 ## [1.12.0] - 2026-03-11
 
 ### Added
